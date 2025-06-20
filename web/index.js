@@ -23,47 +23,9 @@ const app = express();
 // Configure session cookies for embedded apps
 app.set('trust proxy', 1);
 
-// Add headers to handle SameSite cookie issues
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  // Handle SameSite cookie policy for embedded apps
-  if (req.headers['user-agent'] && req.headers['user-agent'].includes('Chrome')) {
-    res.header('Set-Cookie', 'SameSite=None; Secure');
-  }
-  
-  next();
-});
-
 // Configure express for cookie handling
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const reqInterceptor = axios.interceptors.request.use(
-  (config) => {
-    console.log("Request Interceptor:", config);
-    return config;
-  },
-  (error) => {
-    // Do something with request error
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor
-const resInterceptor = axios.interceptors.response.use(
-  (response) => {
-    console.log("Response Interceptor:", response);
-    return response;
-  },
-  (error) => {
-    // Do something with response error
-    return Promise.reject(error);
-  }
-);
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
@@ -79,7 +41,7 @@ app.post(
 
 // If you are adding routes outside of the /api path, remember to
 // also add a proxy rule for them in web/frontend/vite.config.js
-
+// All endpoints after this point will require an active session.
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
 function convertLineItemsEmail(items) {
@@ -114,6 +76,7 @@ function convertLineItemsEmail(items) {
         const expectedFromDate = new Date(item.expectedFrom);
         const expectedToDate = new Date(item.expectedTo);
 
+        /** @type {Intl.DateTimeFormatOptions} */
         const options = { day: "numeric", month: "short", year: "2-digit" };
 
         const formattedFromDate = expectedFromDate
@@ -174,10 +137,6 @@ app.post("/proxy/manifests", async (req, res) => {
     } else {
       res.status(500).json({ error: "Failed to fetch from the API" });
     }
-  } finally {
-    // Remove interceptors
-    axios.interceptors.request.eject(reqInterceptor);
-    axios.interceptors.response.eject(resInterceptor);
   }
 });
 
@@ -211,10 +170,6 @@ app.post("/proxy/shipping", async (req, res) => {
     } else {
       res.status(500).json({ error: "Failed to fetch from the API" });
     }
-  } finally {
-    // Remove interceptors
-    axios.interceptors.request.eject(reqInterceptor);
-    axios.interceptors.response.eject(resInterceptor);
   }
 });
 
@@ -284,12 +239,12 @@ app.post("/api/call/graphql", async (req, res) => {
       },
     });
 
-    console.log("api response", response?.body?.data);
+    console.log("api response", response?.body);
 
     res
       .status(200)
       .setHeader("Content-Type", "application/json")
-      .send(JSON.stringify(response?.body?.data));
+      .send(JSON.stringify(response?.body || {}));
   } catch (error) {
     console.error("Error occurred:", error);
 
@@ -309,7 +264,7 @@ app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
-  return res
+  res
     .status(200)
     .set("Content-Type", "text/html")
     .send(readFileSync(join(STATIC_PATH, "index.html")));
