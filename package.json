@@ -1,0 +1,31 @@
+{
+  "name": "df-v2",
+  "version": "1.0.0",
+  "main": "web/index.js",
+  "license": "UNLICENSED",
+  "scripts": {
+    "shopify": "shopify",
+    "build": "SHOPIFY_API_KEY=your_api_key_here shopify app build",
+    "dev": "shopify app dev",
+    "info": "shopify app info",
+    "generate": "shopify app generate",
+    "deploy": "shopify app deploy",
+    "postinstall": "cd web && npm install"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.507.0",
+    "@aws-sdk/credential-provider-node": "^3.507.0",
+    "axios": "^1.4.0",
+    "bwip-js": "^4.5.1",
+    "nodemailer": "^6.9.9",
+    "pdf-lib": "^1.17.1"
+  },
+  "author": "ian",
+  "private": true,
+  "workspaces": [
+    "web",
+    "web/frontend",
+    "extensions/*"
+  ],
+  "devDependencies": {}
+}

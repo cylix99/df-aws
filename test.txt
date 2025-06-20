@@ -1,0 +1,411 @@
+request Token:
+{
+    "transitional": {
+        "silentJSONParsing": true,
+        "forcedJSONParsing": true,
+        "clarifyTimeoutError": false
+    },
+    "adapter": [
+        "xhr",
+        "http"
+    ],
+    "transformRequest": [
+        null
+    ],
+    "transformResponse": [
+        null
+    ],
+    "timeout": 0,
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+    "maxContentLength": -1,
+    "maxBodyLength": -1,
+    "env": {},
+    "headers": {
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "method": "post",
+    "url": "https://authentication.proshipping.net/connect/token",
+    "data": "grant_type=client_credentials&client_id=7179C24746DE67CE3498458CD6CE3B5E&client_secret=CF2A133BF48095B7780A40F30BBA119D81EFEB374A574BFE12D568BB3EBAD39C"
+}
+
+Response Token
+{
+    "data": {
+        "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjYwRUM5MEZFNTc4QUY0Rjk0OEE0MUU2NDUxMTQ2MkQzRjhCQzQxMEFSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6IllPeVFfbGVLOVBsSXBCNWtVUlJpMF9pOFFRbyJ9.eyJuYmYiOjE2OTI4Njg1MDMsImV4cCI6MTY5Mjg3MjEwMywiaXNzIjoiaHR0cHM6Ly9hdXRoZW50aWNhdGlvbi5wcm9zaGlwcGluZy5uZXQvIiwiYXVkIjoibWNzc2FwaSIsImNsaWVudF9pZCI6IjcxNzlDMjQ3NDZERTY3Q0UzNDk4NDU4Q0Q2Q0UzQjVFIiwiQ3VzdG9tZXJJZCI6IjQwMSIsIkN1c3RvbWVyR2xvYmFsVW5pcXVlSWQiOiIwZTA0MTBlYS1kNWVlLTQ4ZDItOWVjMi1kOGYwNWQ5OGYzZWYiLCJEZWZhdWx0Q291bnRyeUNvZGUiOiJHQiIsIkRlZmF1bHRDdXJyZW5jeUNvZGUiOiJHQlAiLCJEZWZhdWx0U2hpcHBpbmdMb2NhdGlvbklkIjoiN2NiZDI2ZTktZjIwMC00ZmVjLWE0ODktZTkwM2RiYmVmNzkwIiwiUmVzdHJpY3RUb1NhbmRib3giOiJUcnVlIiwiQWxsb3dIdXJyaWNhbmVTZXJ2aWNlcyI6IkZhbHNlIiwiQWxsb3dDdXN0b21zVXRpbGl0aWVzIjoiRmFsc2UiLCJBbGxvd0FwaVNlcnZpY2VzIjoiRmFsc2UiLCJBbGxvd0xhbmRlZENvc3RTZXJ2aWNlcyI6IkZhbHNlIiwiSXNJdGVtVmVyaWZpY2F0aW9uRW5hYmxlZCI6IlRydWUiLCJqdGkiOiI2MjY1NzRGQTlEOUQxNzM5QjMzQkEyNzc2RTc5RTM3OCIsImlhdCI6MTY5Mjg2ODUwMywic2NvcGUiOlsibWNzc2FwaS5hbGwiXX0.aqqtRCg7tOmY6p8Wb04ui9ETxMz5jIqyXXrloVdJq28c4xZRkHKiyB6DA96qmzcQnV6IPuMq5N1yZAxs70RfNAIPDOOrQe2iHq_3PowRdZXGMmTWZsyDu79BOra1kmCUfbfdqN5r9m3RgEThtj3epcnyCXCgrB3ux4F_Zjhd_-7dYSm7eSeu5SjTIHyF0Gd0eLMBpfDp_2i2oaq0yUmYRZCVL7mnNMKghALjqs_iJkeIh5s5NhAwGAoezQoasOAsWDha5SkLa8lcYkaH0_nxQi4Qt2eMPpZYkXG2spf-T_jpV7yMi-Urg2oBFkfqAyjbuirqPbLBFKCJrVaXpyI77w",
+        "expires_in": 3600,
+        "token_type": "Bearer",
+        "scope": "mcssapi.all"
+    },
+    "status": 200,
+    "statusText": "",
+    "headers": {
+        "cache-control": "no-store, no-cache, max-age=0",
+        "content-type": "application/json; charset=UTF-8",
+        "pragma": "no-cache"
+    },
+    "config": {
+        "transitional": {
+            "silentJSONParsing": true,
+            "forcedJSONParsing": true,
+            "clarifyTimeoutError": false
+        },
+        "adapter": [
+            "xhr",
+            "http"
+        ],
+        "transformRequest": [
+            null
+        ],
+        "transformResponse": [
+            null
+        ],
+        "timeout": 0,
+        "xsrfCookieName": "XSRF-TOKEN",
+        "xsrfHeaderName": "X-XSRF-TOKEN",
+        "maxContentLength": -1,
+        "maxBodyLength": -1,
+        "env": {},
+        "headers": {
+            "Accept": "application/json, text/plain, */*",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "method": "post",
+        "url": "https://authentication.proshipping.net/connect/token",
+        "data": "grant_type=client_credentials&client_id=7179C24746DE67CE3498458CD6CE3B5E&client_secret=CF2A133BF48095B7780A40F30BBA119D81EFEB374A574BFE12D568BB3EBAD39C"
+    },
+    "request": {}
+}
+
+Request Int
+ Request Interceptor: {
+   transitional: {
+     silentJSONParsing: true,
+     forcedJSONParsing: true,
+     clarifyTimeoutError: false
+   },
+   adapter: [ 'xhr', 'http' ],
+   transformRequest: [ [Function: transformRequest] ],
+   transformResponse: [ [Function: transformResponse] ],
+   timeout: 0,
+   xsrfCookieName: 'XSRF-TOKEN',
+   xsrfHeaderName: 'X-XSRF-TOKEN',
+   maxContentLength: -1,
+   maxBodyLength: -1,
+   env: {
+     FormData: [Function: FormData] {
+       LINE_BREAK: '\r\n',
+       DEFAULT_CONTENT_TYPE: 'application/octet-stream'
+     },
+     Blob: [class Blob]
+   },
+   validateStatus: [Function: validateStatus],
+   headers: AxiosHeaders {
+     Accept: 'application/json',
+     'Content-Type': 'application/json',
+     Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjYwRUM5MEZFNTc4QUY0Rjk0OEE0MUU2NDUxMTQ2MkQzRjhCQzQxMEFSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6IllPeVFfbGVLOVBsSXBCNWtVUlJpMF9pOFFRbyJ9.eyJuYmYiOjE2OTI4ODg3MDUsImV4cCI6MTY5Mjg5MjMwNSwiaXNzIjoiaHR0cHM6Ly9hdXRoZW50aWNhdGlvbi5wcm9zaGlwcGluZy5uZXQvIiwiYXVkIjoibWNzc2FwaSIsImNsaWVudF9pZCI6IjcxNzlDMjQ3NDZERTY3Q0UzNDk4NDU4Q0Q2Q0UzQjVFIiwiQ3VzdG9tZXJJZCI6IjQwMSIsIkN1c3RvbWVyR2xvYmFsVW5pcXVlSWQiOiIwZTA0MTBlYS1kNWVlLTQ4ZDItOWVjMi1kOGYwNWQ5OGYzZWYiLCJEZWZhdWx0Q291bnRyeUNvZGUiOiJHQiIsIkRlZmF1bHRDdXJyZW5jeUNvZGUiOiJHQlAiLCJEZWZhdWx0U2hpcHBpbmdMb2NhdGlvbklkIjoiN2NiZDI2ZTktZjIwMC00ZmVjLWE0ODktZTkwM2RiYmVmNzkwIiwiUmVzdHJpY3RUb1NhbmRib3giOiJUcnVlIiwiQWxsb3dIdXJyaWNhbmVTZXJ2aWNlcyI6IkZhbHNlIiwiQWxsb3dDdXN0b21zVXRpbGl0aWVzIjoiRmFsc2UiLCJBbGxvd0FwaVNlcnZpY2VzIjoiRmFsc2UiLCJBbGxvd0xhbmRlZENvc3RTZXJ2aWNlcyI6IkZhbHNlIiwiSXNJdGVtVmVyaWZpY2F0aW9uRW5hYmxlZCI6IlRydWUiLCJqdGkiOiIyOTk2MkI0MkRFMDI0M0RDM0QxMkQwODNGNzZDNzQwNSIsImlhdCI6MTY5Mjg4ODcwNSwic2NvcGUiOlsibWNzc2FwaS5hbGwiXX0.aAm0eX-3ZmXDg760qqtG0rtX3g5Axg1PyzDuRTXlXAIFBalXD_DgzTkcKyWnhNwdh0ice4_Phv5yWKdN7QTJ7oBgmMzxfjJ51yrfIK1JerSsq4xTfymGJs76tsAB6nmo9tBVPGrGcJZxkC0joUGpL4t2qqlnMcsQg_Qo71WK7c9cgSlB49UDI0HxCL6nxClFSAouPqy02NN84uTkUe7mvbtcHsFd6piMzH_vR8lAt-HTxsyhOpA8ZJ9wz7ngOxfQOluXMuvcINEgsRzMdJt6KLAaSwsqgiHN7qyvkFXcvVuovk0tEnJefrIBUhDY2hnH9bX9xoxBA0CJKUNZxH_WSQ'
+   },
+   method: 'post',
+   url: 'https://api.proshipping.net/v4/shipments/rm',
+   data: {
+     Shipper: {
+       Reference1: 'DKD49',
+       Reference2: 'BGG1209',
+       ShippingAccountId: 'Duncans Retail Ltd',
+       VatNumber: 'IM4420001201'
+     },
+     Destination: { Address: [Object] },
+     ShipmentInformation: {
+       ShipmentDate: '2023-08-24',
+       ServiceCode: 'MP7',
+       DeclaredWeight: '1.20',
+       WeightUnitOfMeasure: 'KG',
+       ContentType: 'NDX',
+       DescriptionOfGoods: 'Toys',
+       CurrencyCode: 'GBP',
+       LabelFormat: 'PDF'
+     },
+     Packages: [ [Object] ],
+     Items: [ [Object] ],
+     Customs: {
+       PreRegistrationNumber: 'IM4420001201',
+       PreRegistrationType: 'PRS',
+       ShippingCharges: 11.77,
+       OtherCharges: 0,
+       QuotedLandedCost: 0,
+       InvoiceNumber: 'BGG1209',
+       InvoiceDate: '2023-08-23T15:58:20Z',
+       ReasonForExport: 'Sale of Goods',
+       Incoterms: 'DDU'
+     }
+   }
+ }
+
+
+Response Int
+Response Interceptor: {
+   status: 200,
+   statusText: 'OK',
+   headers: AxiosHeaders {
+     date: 'Thu, 24 Aug 2023 14:51:45 GMT',
+     'content-type': 'application/json; charset=utf-8',
+     'transfer-encoding': 'chunked',
+     connection: 'close',
+     'api-supported-versions': '4.0-RM, 4.0',
+     'strict-transport-security': 'max-age=15724800; includeSubDomains',
+     'cf-cache-status': 'DYNAMIC',
+     server: 'cloudflare',
+     'cf-ray': '7fbc6a49a8709582-DUB'
+   },
+   config: {
+     transitional: {
+       silentJSONParsing: true,
+       forcedJSONParsing: true,
+       clarifyTimeoutError: false
+     },
+     adapter: [ 'xhr', 'http' ],
+     transformRequest: [ [Function: transformRequest] ],
+     transformResponse: [ [Function: transformResponse] ],
+     timeout: 0,
+     xsrfCookieName: 'XSRF-TOKEN',
+     xsrfHeaderName: 'X-XSRF-TOKEN',
+     maxContentLength: -1,
+     maxBodyLength: -1,
+     env: { FormData: [Function], Blob: [class Blob] },
+     validateStatus: [Function: validateStatus],
+     headers: AxiosHeaders {
+       Accept: 'application/json',
+       'Content-Type': 'application/json',
+       Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjYwRUM5MEZFNTc4QUY0Rjk0OEE0MUU2NDUxMTQ2MkQzRjhCQzQxMEFSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6IllPeVFfbGVLOVBsSXBCNWtVUlJpMF9pOFFRbyJ9.eyJuYmYiOjE2OTI4ODg3MDUsImV4cCI6MTY5Mjg5MjMwNSwiaXNzIjoiaHR0cHM6Ly9hdXRoZW50aWNhdGlvbi5wcm9zaGlwcGluZy5uZXQvIiwiYXVkIjoibWNzc2FwaSIsImNsaWVudF9pZCI6IjcxNzlDMjQ3NDZERTY3Q0UzNDk4NDU4Q0Q2Q0UzQjVFIiwiQ3VzdG9tZXJJZCI6IjQwMSIsIkN1c3RvbWVyR2xvYmFsVW5pcXVlSWQiOiIwZTA0MTBlYS1kNWVlLTQ4ZDItOWVjMi1kOGYwNWQ5OGYzZWYiLCJEZWZhdWx0Q291bnRyeUNvZGUiOiJHQiIsIkRlZmF1bHRDdXJyZW5jeUNvZGUiOiJHQlAiLCJEZWZhdWx0U2hpcHBpbmdMb2NhdGlvbklkIjoiN2NiZDI2ZTktZjIwMC00ZmVjLWE0ODktZTkwM2RiYmVmNzkwIiwiUmVzdHJpY3RUb1NhbmRib3giOiJUcnVlIiwiQWxsb3dIdXJyaWNhbmVTZXJ2aWNlcyI6IkZhbHNlIiwiQWxsb3dDdXN0b21zVXRpbGl0aWVzIjoiRmFsc2UiLCJBbGxvd0FwaVNlcnZpY2VzIjoiRmFsc2UiLCJBbGxvd0xhbmRlZENvc3RTZXJ2aWNlcyI6IkZhbHNlIiwiSXNJdGVtVmVyaWZpY2F0aW9uRW5hYmxlZCI6IlRydWUiLCJqdGkiOiIyOTk2MkI0MkRFMDI0M0RDM0QxMkQwODNGNzZDNzQwNSIsImlhdCI6MTY5Mjg4ODcwNSwic2NvcGUiOlsibWNzc2FwaS5hbGwiXX0.aAm0eX-3ZmXDg760qqtG0rtX3g5Axg1PyzDuRTXlXAIFBalXD_DgzTkcKyWnhNwdh0ice4_Phv5yWKdN7QTJ7oBgmMzxfjJ51yrfIK1JerSsq4xTfymGJs76tsAB6nmo9tBVPGrGcJZxkC0joUGpL4t2qqlnMcsQg_Qo71WK7c9cgSlB49UDI0HxCL6nxClFSAouPqy02NN84uTkUe7mvbtcHsFd6piMzH_vR8lAt-HTxsyhOpA8ZJ9wz7ngOxfQOluXMuvcINEgsRzMdJt6KLAaSwsqgiHN7qyvkFXcvVuovk0tEnJefrIBUhDY2hnH9bX9xoxBA0CJKUNZxH_WSQ',
+       'User-Agent': 'axios/1.4.0',
+       'Content-Length': '1201',
+       'Accept-Encoding': 'gzip, compress, deflate, br'
+     },
+     method: 'post',
+     url: 'https://api.proshipping.net/v4/shipments/rm',
+     data: '{"Shipper":{"Reference1":"DKD49","Reference2":"BGG1209","ShippingAccountId":"Duncans Retail Ltd","VatNumber":"IM4420001201"},"Destination":{"Address":{"CompanyName":"","ContactName":"Jean SOUBRIER","Line1":"Route de Cassagnaberes","Line2":"Plaisance","Line3":null,"Town":"Aurignac","County":"","CountryCode":"FR","Postcode":"31420"}},"ShipmentInformation":{"ShipmentDate":"2023-08-24","ServiceCode":"MP7","DeclaredWeight":"1.20","WeightUnitOfMeasure":"KG","ContentType":"NDX","DescriptionOfGoods":"Toys","CurrencyCode":"GBP","LabelFormat":"PDF"},"Packages":[{"PackageOccurrence":1,"DeclaredWeight":"1.20","PackageType":"Parcel"}],"Items":[{"Quantity":2,"Description":"[Toys] Pictionary Drawing Game, Board Game for Family, Kids, Teens and Adults, White Boards, Markers, Adult and Junior Clue Cards, Gift for 8 Years+, DKD49","Value":"24.31","Weight":"0.600","PackageOccurrence":1,"HsCode":"9503009590","SkuCode":"DKD49","CountryOfOrigin":"DE"}],"Customs":{"PreRegistrationNumber":"IM4420001201","PreRegistrationType":"PRS","ShippingCharges":11.77,"OtherCharges":0,"QuotedLandedCost":0,"InvoiceNumber":"BGG1209","InvoiceDate":"2023-08-23T15:58:20Z","ReasonForExport":"Sale of Goods","Incoterms":"DDU"}}'
+   },
+ }
+
+
+48 request
+Request Interceptor: {
+:   transitional: {
+:     silentJSONParsing: true,
+:     forcedJSONParsing: true,
+:     clarifyTimeoutError: false
+:   },
+:   adapter: [ 'xhr', 'http' ],
+:   transformRequest: [ [Function: transformRequest] ],
+:   transformResponse: [ [Function: transformResponse] ],
+:   timeout: 0,
+:   xsrfCookieName: 'XSRF-TOKEN',
+:   xsrfHeaderName: 'X-XSRF-TOKEN',
+:   maxContentLength: -1,
+:   maxBodyLength: -1,
+:   env: {
+:     FormData: [Function: FormData] {
+:       LINE_BREAK: '\r\n',
+:       DEFAULT_CONTENT_TYPE: 'application/octet-stream'
+:     },
+:     Blob: [class Blob]
+:   },
+:   validateStatus: [Function: validateStatus],
+:   headers: AxiosHeaders {
+:     Accept: 'application/json',
+:     'Content-Type': 'application/json',
+:     Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjYwRUM5MEZFNTc4QUY0Rjk0OEE0MUU2NDUxMTQ2MkQzRjhCQzQxMEFSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6IllPeVFfbGVLOVBsSXBCNWtVUlJpMF9pOFFRbyJ9.eyJuYmYiOjE2OTI4Njg5MjYsImV4cCI6MTY5Mjg3MjUyNiwiaXNzIjoiaHR0cHM6Ly9hdXRoZW50aWNhdGlvbi5wcm9zaGlwcGluZy5uZXQvIiwiYXVkIjoibWNzc2FwaSIsImNsaWVudF9pZCI6IjcxNzlDMjQ3NDZERTY3Q0UzNDk4NDU4Q0Q2Q0UzQjVFIiwiQ3VzdG9tZXJJZCI6IjQwMSIsIkN1c3RvbWVyR2xvYmFsVW5pcXVlSWQiOiIwZTA0MTBlYS1kNWVlLTQ4ZDItOWVjMi1kOGYwNWQ5OGYzZWYiLCJEZWZhdWx0Q291bnRyeUNvZGUiOiJHQiIsIkRlZmF1bHRDdXJyZW5jeUNvZGUiOiJHQlAiLCJEZWZhdWx0U2hpcHBpbmdMb2NhdGlvbklkIjoiN2NiZDI2ZTktZjIwMC00ZmVjLWE0ODktZTkwM2RiYmVmNzkwIiwiUmVzdHJpY3RUb1NhbmRib3giOiJUcnVlIiwiQWxsb3dIdXJyaWNhbmVTZXJ2aWNlcyI6IkZhbHNlIiwiQWxsb3dDdXN0b21zVXRpbGl0aWVzIjoiRmFsc2UiLCJBbGxvd0FwaVNlcnZpY2VzIjoiRmFsc2UiLCJBbGxvd0xhbmRlZENvc3RTZXJ2aWNlcyI6IkZhbHNlIiwiSXNJdGVtVmVyaWZpY2F0aW9uRW5hYmxlZCI6IlRydWUiLCJqdGkiOiI4RTVENzUyQ0FDMTRGRDM5MDAxMDJDMzI3QkRBNDJGQSIsImlhdCI6MTY5Mjg2ODkyNiwic2NvcGUiOlsibWNzc2FwaS5hbGwiXX0.z_n5ZbIdRFX0MF8ugn-pBiLQXaZPk7UjOCNYLX2ZbIwQwkUG_oevcG_t4phujIpXP1WTcr6Ex-wFyLN9IV-MnPICCxxF6Y29jplXJmJJGpQezK34cOi9M4sRQJBcFpRmegP4vA1uwmGQRPmIvBwhdb65Cv0AlzruO_QhmwfIxiSFGhnmsUD0WyItZourts7XN252pNxAxiGhWPRGeU57nQtTB2k0LVlzoNz5bo8H4cCAO1xjH6ZCfout4tSU6o9vm8WpaLic1bHm8zMJrfm6HCXH1vz-9EqY88Ysy2BCCgiB9cFzzb5kNmeuy75fbkQizlO3QnRR5knWqRJo4Ic6gA'
+:   },
+:   method: 'post',
+:   url: 'https://api.proshipping.net/v4/shipments/rm',
+:   data: {
+:     Shipper: {
+:       Reference1: '17542',
+:       Reference2: 'PG19015',
+:       ShippingAccountId: 'Duncans Retail Ltd',
+:       VatNumber: 'GB879355368'
+:     },
+:     Destination: { Address: [Object] },
+:     ShipmentInformation: {
+:       ShipmentDate: '2023-08-24',
+:       ServiceCode: 'CRL2',
+:       DeclaredWeight: '0.99',
+:       WeightUnitOfMeasure: 'KG',
+:       ContentType: 'NDX',
+:       DescriptionOfGoods: 'Toys',
+:       CurrencyCode: 'GBP',
+:       LabelFormat: 'PDF'
+:     },
+:     Packages: [ [Object] ],
+:     Items: [ [Object] ],
+:     Customs: {
+:       PreRegistrationNumber: 'GB879355368',
+:       PreRegistrationType: 'VAT',
+:       ShippingCharges: 2.7920000000000003,
+:       OtherCharges: 0,
+:       QuotedLandedCost: 0,
+:       InvoiceNumber: 'PG19015',
+:       InvoiceDate: '2023-08-24T08:09:43Z',
+:       ReasonForExport: 'Sales of Goods',
+:       Incoterms: 'DDU'
+:     }
+:   }
+: }
+
+48 response
+Response Interceptor: {
+:   status: 200,
+:   statusText: 'OK',
+:   headers: AxiosHeaders {
+:     date: 'Thu, 24 Aug 2023 09:27:42 GMT',
+:     'content-type': 'application/json; charset=utf-8',
+:     'transfer-encoding': 'chunked',
+:     connection: 'close',
+:     'api-supported-versions': '4.0-RM, 4.0',
+:     'strict-transport-security': 'max-age=15724800; includeSubDomains',
+:     'cf-cache-status': 'DYNAMIC',
+:     server: 'cloudflare',
+:     'cf-ray': '7fba8f9a1a199570-DUB'
+:   },
+:   config: {
+:     transitional: {
+:       silentJSONParsing: true,
+:       forcedJSONParsing: true,
+:       clarifyTimeoutError: false
+:     },
+:     adapter: [ 'xhr', 'http' ],
+:     transformRequest: [ [Function: transformRequest] ],
+:     transformResponse: [ [Function: transformResponse] ],
+:     timeout: 0,
+:     xsrfCookieName: 'XSRF-TOKEN',
+:     xsrfHeaderName: 'X-XSRF-TOKEN',
+:     maxContentLength: -1,
+:     maxBodyLength: -1,
+:     env: { FormData: [Function], Blob: [class Blob] },
+:     validateStatus: [Function: validateStatus],
+:     headers: AxiosHeaders {
+:       Accept: 'application/json',
+:       'Content-Type': 'application/json',
+:       Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjYwRUM5MEZFNTc4QUY0Rjk0OEE0MUU2NDUxMTQ2MkQzRjhCQzQxMEFSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6IllPeVFfbGVLOVBsSXBCNWtVUlJpMF9pOFFRbyJ9.eyJuYmYiOjE2OTI4Njg5MjYsImV4cCI6MTY5Mjg3MjUyNiwiaXNzIjoiaHR0cHM6Ly9hdXRoZW50aWNhdGlvbi5wcm9zaGlwcGluZy5uZXQvIiwiYXVkIjoibWNzc2FwaSIsImNsaWVudF9pZCI6IjcxNzlDMjQ3NDZERTY3Q0UzNDk4NDU4Q0Q2Q0UzQjVFIiwiQ3VzdG9tZXJJZCI6IjQwMSIsIkN1c3RvbWVyR2xvYmFsVW5pcXVlSWQiOiIwZTA0MTBlYS1kNWVlLTQ4ZDItOWVjMi1kOGYwNWQ5OGYzZWYiLCJEZWZhdWx0Q291bnRyeUNvZGUiOiJHQiIsIkRlZmF1bHRDdXJyZW5jeUNvZGUiOiJHQlAiLCJEZWZhdWx0U2hpcHBpbmdMb2NhdGlvbklkIjoiN2NiZDI2ZTktZjIwMC00ZmVjLWE0ODktZTkwM2RiYmVmNzkwIiwiUmVzdHJpY3RUb1NhbmRib3giOiJUcnVlIiwiQWxsb3dIdXJyaWNhbmVTZXJ2aWNlcyI6IkZhbHNlIiwiQWxsb3dDdXN0b21zVXRpbGl0aWVzIjoiRmFsc2UiLCJBbGxvd0FwaVNlcnZpY2VzIjoiRmFsc2UiLCJBbGxvd0xhbmRlZENvc3RTZXJ2aWNlcyI6IkZhbHNlIiwiSXNJdGVtVmVyaWZpY2F0aW9uRW5hYmxlZCI6IlRydWUiLCJqdGkiOiI4RTVENzUyQ0FDMTRGRDM5MDAxMDJDMzI3QkRBNDJGQSIsImlhdCI6MTY5Mjg2ODkyNiwic2NvcGUiOlsibWNzc2FwaS5hbGwiXX0.z_n5ZbIdRFX0MF8ugn-pBiLQXaZPk7UjOCNYLX2ZbIwQwkUG_oevcG_t4phujIpXP1WTcr6Ex-wFyLN9IV-MnPICCxxF6Y29jplXJmJJGpQezK34cOi9M4sRQJBcFpRmegP4vA1uwmGQRPmIvBwhdb65Cv0AlzruO_QhmwfIxiSFGhnmsUD0WyItZourts7XN252pNxAxiGhWPRGeU57nQtTB2k0LVlzoNz5bo8H4cCAO1xjH6ZCfout4tSU6o9vm8WpaLic1bHm8zMJrfm6HCXH1vz-9EqY88Ysy2BCCgiB9cFzzb5kNmeuy75fbkQizlO3QnRR5knWqRJo4Ic6gA',
+:       'User-Agent': 'axios/1.4.0',
+:       'Content-Length': '1137',
+:       'Accept-Encoding': 'gzip, compress, deflate, br'
+:     },
+:     method: 'post',
+:     url: 'https://api.proshipping.net/v4/shipments/rm',
+:     data: `{"Shipper":{"Reference1":"17542","Reference2":"PG19015","ShippingAccountId":"Duncans Retail Ltd","VatNumber":"GB879355368"},"Destination":{"Address":{"ContactName":"Katie Ramsay","Line1":"4 Mary Park Gardens","Line2":null,"Line3":null,"Town":"Bishop's Stortford","County":"England","CountryCode":"GB","Postcode":"CM23 3ES"}},"ShipmentInformation":{"ShipmentDate":"2023-08-24","ServiceCode":"CRL2","DeclaredWeight":"0.99","WeightUnitOfMeasure":"KG","ContentType":"NDX","DescriptionOfGoods":"Toys","CurrencyCode":"GBP","LabelFormat":"PDF"},"Packages":[{"PackageOccurrence":1,"DeclaredWeight":"0.99","PackageType":"Parcel"}],"Items":[{"Quantity":1,"Description":"[Toys] Ravensburger - Disney Collector's Edition Aristocats - 1000 Piece Jigsaw Puzzle","Value":"12.00","Weight":"0.990","PackageOccurrence":1,"HsCode":"9503006900","SkuCode":"17542","CountryOfOrigin":"DE"}],"Customs":{"PreRegistrationNumber":"GB879355368","PreRegistrationType":"VAT","ShippingCharges":2.7920000000000003,"OtherCharges":0,"QuotedLandedCost":0,"InvoiceNumber":"PG19015","InvoiceDate":"2023-08-24T08:09:43Z","ReasonForExport":"Sales of Goods","Incoterms":"DDU"}}`
+:   },
+
+48 Tracked Request
+Request Interceptor: {
+   transitional: {
+     silentJSONParsing: true,
+     forcedJSONParsing: true,
+     clarifyTimeoutError: false
+   },
+   adapter: [ 'xhr', 'http' ],
+   transformRequest: [ [Function: transformRequest] ],
+   transformResponse: [ [Function: transformResponse] ],
+   timeout: 0,
+   xsrfCookieName: 'XSRF-TOKEN',
+   xsrfHeaderName: 'X-XSRF-TOKEN',
+   maxContentLength: -1,
+   maxBodyLength: -1,
+   env: {
+     FormData: [Function: FormData] {
+       LINE_BREAK: '\r\n',
+       DEFAULT_CONTENT_TYPE: 'application/octet-stream'
+     },
+     Blob: [class Blob]
+   },
+   validateStatus: [Function: validateStatus],
+   headers: AxiosHeaders {
+     Accept: 'application/json',
+     'Content-Type': 'application/json',
+     Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjYwRUM5MEZFNTc4QUY0Rjk0OEE0MUU2NDUxMTQ2MkQzRjhCQzQxMEFSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6IllPeVFfbGVLOVBsSXBCNWtVUlJpMF9pOFFRbyJ9.eyJuYmYiOjE2OTI4ODkxODMsImV4cCI6MTY5Mjg5Mjc4MywiaXNzIjoiaHR0cHM6Ly9hdXRoZW50aWNhdGlvbi5wcm9zaGlwcGluZy5uZXQvIiwiYXVkIjoibWNzc2FwaSIsImNsaWVudF9pZCI6IjcxNzlDMjQ3NDZERTY3Q0UzNDk4NDU4Q0Q2Q0UzQjVFIiwiQ3VzdG9tZXJJZCI6IjQwMSIsIkN1c3RvbWVyR2xvYmFsVW5pcXVlSWQiOiIwZTA0MTBlYS1kNWVlLTQ4ZDItOWVjMi1kOGYwNWQ5OGYzZWYiLCJEZWZhdWx0Q291bnRyeUNvZGUiOiJHQiIsIkRlZmF1bHRDdXJyZW5jeUNvZGUiOiJHQlAiLCJEZWZhdWx0U2hpcHBpbmdMb2NhdGlvbklkIjoiN2NiZDI2ZTktZjIwMC00ZmVjLWE0ODktZTkwM2RiYmVmNzkwIiwiUmVzdHJpY3RUb1NhbmRib3giOiJUcnVlIiwiQWxsb3dIdXJyaWNhbmVTZXJ2aWNlcyI6IkZhbHNlIiwiQWxsb3dDdXN0b21zVXRpbGl0aWVzIjoiRmFsc2UiLCJBbGxvd0FwaVNlcnZpY2VzIjoiRmFsc2UiLCJBbGxvd0xhbmRlZENvc3RTZXJ2aWNlcyI6IkZhbHNlIiwiSXNJdGVtVmVyaWZpY2F0aW9uRW5hYmxlZCI6IlRydWUiLCJqdGkiOiI3QjdENEMwM0U4NjI1Q0NEMEM5NjYwMDhDNDYyNDQyQyIsImlhdCI6MTY5Mjg4OTE4Mywic2NvcGUiOlsibWNzc2FwaS5hbGwiXX0.Baa8mlmclhA5qyGJ4tNkB-UXvNt7wDBNedLMimNOA-EcSxEIAyR21jaX2DzpFRYwmyLKT87rq1ghxJvvUa9oep6nVSEE8BqohW7n4vmWZPjkc2ncTv5m19m7mGjSzcM8_n547t69OdQJRjUZDTSVAehuda3TESvJnPpTi3Cm9dGSkIt1EBJiFkUCcX_VDRDl8zL2ou7br0gLfy2DRLlhHKKB0a5BL7GWvLeTXqtwb2ockPyEUR87tk491QzkXj5nWhDvrBcz-7OGgo73BFKwd33TiPEDVnU1PyIIbF2OxkOtC78Huw1RuAEQRxR98nQ53_OV4BukzAQKIcxWWwnU4A'
+   },
+   method: 'post',
+   url: 'https://api.proshipping.net/v4/shipments/rm',
+   data: {
+     Shipper: {
+       Reference1: '11351,G7073,G7034,G7126',
+       Reference2: 'PG19033',
+       ShippingAccountId: 'Duncans Retail Ltd',
+       VatNumber: 'GB879355368'
+     },
+     Destination: { Address: [Object] },
+     ShipmentInformation: {
+       ShipmentDate: '2023-08-24',
+       ServiceCode: 'TPS',
+       DeclaredWeight: '3.84',
+       WeightUnitOfMeasure: 'KG',
+       ContentType: 'NDX',
+       DescriptionOfGoods: 'Toys',
+       CurrencyCode: 'GBP',
+       LabelFormat: 'PDF'
+     },
+     Packages: [ [Object] ],
+     Items: [ [Object], [Object], [Object], [Object] ],
+     Customs: {
+       PreRegistrationNumber: 'GB879355368',
+       PreRegistrationType: 'VAT',
+       ShippingCharges: 0,
+       OtherCharges: 0,
+       QuotedLandedCost: 0,
+       InvoiceNumber: 'PG19033',
+       InvoiceDate: '2023-08-24T14:30:52Z',
+       ReasonForExport: 'Sale of Goods',
+       Incoterms: 'DDU'
+     },
+     CarrierSpecifics: { ServiceEnhancements: [Array] }
+   }
+ }
+
+48 Tracked Response
+
+ Response Interceptor: {
+   status: 200,
+   statusText: 'OK',
+   headers: AxiosHeaders {
+     date: 'Thu, 24 Aug 2023 14:59:44 GMT',
+     'content-type': 'application/json; charset=utf-8',
+     'transfer-encoding': 'chunked',
+     connection: 'close',
+     'api-supported-versions': '4.0-RM, 4.0',
+     'strict-transport-security': 'max-age=15724800; includeSubDomains',
+     'cf-cache-status': 'DYNAMIC',
+     server: 'cloudflare',
+     'cf-ray': '7fbc75f81e4e60f2-DUB'
+   },
+   config: {
+     transitional: {
+       silentJSONParsing: true,
+       forcedJSONParsing: true,
+       clarifyTimeoutError: false
+     },
+     adapter: [ 'xhr', 'http' ],
+     transformRequest: [ [Function: transformRequest] ],
+     transformResponse: [ [Function: transformResponse] ],
+     timeout: 0,
+     xsrfCookieName: 'XSRF-TOKEN',
+     xsrfHeaderName: 'X-XSRF-TOKEN',
+     maxContentLength: -1,
+     maxBodyLength: -1,
+     env: { FormData: [Function], Blob: [class Blob] },
+     validateStatus: [Function: validateStatus],
+     headers: AxiosHeaders {
+       Accept: 'application/json',
+       'Content-Type': 'application/json',
+       Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjYwRUM5MEZFNTc4QUY0Rjk0OEE0MUU2NDUxMTQ2MkQzRjhCQzQxMEFSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6IllPeVFfbGVLOVBsSXBCNWtVUlJpMF9pOFFRbyJ9.eyJuYmYiOjE2OTI4ODkxODMsImV4cCI6MTY5Mjg5Mjc4MywiaXNzIjoiaHR0cHM6Ly9hdXRoZW50aWNhdGlvbi5wcm9zaGlwcGluZy5uZXQvIiwiYXVkIjoibWNzc2FwaSIsImNsaWVudF9pZCI6IjcxNzlDMjQ3NDZERTY3Q0UzNDk4NDU4Q0Q2Q0UzQjVFIiwiQ3VzdG9tZXJJZCI6IjQwMSIsIkN1c3RvbWVyR2xvYmFsVW5pcXVlSWQiOiIwZTA0MTBlYS1kNWVlLTQ4ZDItOWVjMi1kOGYwNWQ5OGYzZWYiLCJEZWZhdWx0Q291bnRyeUNvZGUiOiJHQiIsIkRlZmF1bHRDdXJyZW5jeUNvZGUiOiJHQlAiLCJEZWZhdWx0U2hpcHBpbmdMb2NhdGlvbklkIjoiN2NiZDI2ZTktZjIwMC00ZmVjLWE0ODktZTkwM2RiYmVmNzkwIiwiUmVzdHJpY3RUb1NhbmRib3giOiJUcnVlIiwiQWxsb3dIdXJyaWNhbmVTZXJ2aWNlcyI6IkZhbHNlIiwiQWxsb3dDdXN0b21zVXRpbGl0aWVzIjoiRmFsc2UiLCJBbGxvd0FwaVNlcnZpY2VzIjoiRmFsc2UiLCJBbGxvd0xhbmRlZENvc3RTZXJ2aWNlcyI6IkZhbHNlIiwiSXNJdGVtVmVyaWZpY2F0aW9uRW5hYmxlZCI6IlRydWUiLCJqdGkiOiI3QjdENEMwM0U4NjI1Q0NEMEM5NjYwMDhDNDYyNDQyQyIsImlhdCI6MTY5Mjg4OTE4Mywic2NvcGUiOlsibWNzc2FwaS5hbGwiXX0.Baa8mlmclhA5qyGJ4tNkB-UXvNt7wDBNedLMimNOA-EcSxEIAyR21jaX2DzpFRYwmyLKT87rq1ghxJvvUa9oep6nVSEE8BqohW7n4vmWZPjkc2ncTv5m19m7mGjSzcM8_n547t69OdQJRjUZDTSVAehuda3TESvJnPpTi3Cm9dGSkIt1EBJiFkUCcX_VDRDl8zL2ou7br0gLfy2DRLlhHKKB0a5BL7GWvLeTXqtwb2ockPyEUR87tk491QzkXj5nWhDvrBcz-7OGgo73BFKwd33TiPEDVnU1PyIIbF2OxkOtC78Huw1RuAEQRxR98nQ53_OV4BukzAQKIcxWWwnU4A',
+       'User-Agent': 'axios/1.4.0',
+       'Content-Length': '1883',
+       'Accept-Encoding': 'gzip, compress, deflate, br'
+     },
+     method: 'post',
+     url: 'https://api.proshipping.net/v4/shipments/rm',
+     data: '{"Shipper":{"Reference1":"11351,G7073,G7034,G7126","Reference2":"PG19033","ShippingAccountId":"Duncans Retail Ltd","VatNumber":"GB879355368"},"Destination":{"Address":{"ContactName":"George Forsyth","Line1":"Flat 2, 30A High Street","Line2":null,"Line3":null,"Town":"Inverurie","County":"Scotland","CountryCode":"GB","Postcode":"AB51 3XQ","ContactEmail":"covey20@icloud.com"}},"ShipmentInformation":{"ShipmentDate":"2023-08-24","ServiceCode":"TPS","DeclaredWeight":"3.84","WeightUnitOfMeasure":"KG","ContentType":"NDX","DescriptionOfGoods":"Toys","CurrencyCode":"GBP","LabelFormat":"PDF"},"Packages":[{"PackageOccurrence":1,"DeclaredWeight":"3.84","PackageType":"Parcel"}],"Items":[{"Quantity":1,"Description":"[Toys] Falcon De Luxe - Open Day At The Fire Station - 1000 Piece Jigsaw Puzzle","Value":"10.80","Weight":"0.990","PackageOccurrence":1,"HsCode":"9503006900","SkuCode":"11351","CountryOfOrigin":"DE"},{"Quantity":1,"Description":"[Toys] Gibsons - The Brands that Built Britain - 1000 Piece Jigsaw Puzzle","Value":"11.60","Weight":"0.950","PackageOccurrence":1,"HsCode":"9503006900","SkuCode":"G7073","CountryOfOrigin":"DE"},{"Quantity":1,"Description":"[Toys] Gibsons - 1980s Shopping Basket - 1000 Piece Jigsaw Puzzle","Value":"11.60","Weight":"0.950","PackageOccurrence":1,"HsCode":"9503006900","SkuCode":"G7034","CountryOfOrigin":"DE"},{"Quantity":1,"Description":"[Toys] Gibsons - Treats That Built Britain  - 1000 Piece Jigsaw Puzzle","Value":"11.60","Weight":"0.950","PackageOccurrence":1,"HsCode":"9503006900","SkuCode":"G7126","CountryOfOrigin":"DE"}],"Customs":{"PreRegistrationNumber":"GB879355368","PreRegistrationType":"VAT","ShippingCharges":0,"OtherCharges":0,"QuotedLandedCost":0,"InvoiceNumber":"PG19033","InvoiceDate":"2023-08-24T14:30:52Z","ReasonForExport":"Sale of Goods","Incoterms":"DDU"},"CarrierSpecifics":{"ServiceEnhancements":[{"Code":"Email"}]}}'
+   },
+
+   Manifest
+   

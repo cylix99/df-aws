@@ -1,0 +1,6 @@
+build:
+  docker:
+    web: Dockerfile
+  config:
+    #SHOPIFY_API_KEY: 5525d6683bf65fa15689d6d2bea1e151 #games
+    SHOPIFY_API_KEY: 0d39435b7debdac0c16e180f5360bf0d #puzzles

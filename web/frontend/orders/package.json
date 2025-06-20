@@ -1,0 +1,11 @@
+{
+  "name": "orders-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Scripts for handling orders",
+  "main": "index.js",
+  "scripts": {
+    "test-pdf": "node testPdf.js",
+    "test-pdf-custom": "node testPdf.js ./custom-thank-you.pdf '{\"discountCode\":\"CUSTOM20\"}'"
+  }
+}
