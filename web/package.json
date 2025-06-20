@@ -15,7 +15,6 @@
   "dependencies": {
     "@aws-sdk/client-ses": "^3.507.0",
     "@shopify/shopify-app-express": "^2.1.3",
-    "@shopify/shopify-app-session-storage-memory": "^4.0.18",
     "@shopify/shopify-app-session-storage-sqlite": "^1.2.3",
     "axios": "^1.4.0",
     "bwip-js": "^4.5.1",
