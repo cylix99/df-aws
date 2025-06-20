@@ -22,9 +22,9 @@ const shopify = shopifyApp({
     callbackPath: "/api/auth/callback",
   },  webhooks: {
     path: "/api/webhooks",
-  },  // This should be replaced with your preferred storage strategy
-  sessionStorage: new SQLiteSessionStorage(DB_PATH),
+  },  // This should be replaced with your preferred storage strategy  sessionStorage: new SQLiteSessionStorage(DB_PATH),
   useOnlineTokens: false,
+  distribution: "app",
 });
 
 export default shopify;

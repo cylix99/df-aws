@@ -23,6 +23,21 @@ const app = express();
 // Configure session cookies for embedded apps
 app.set('trust proxy', 1);
 
+// Add headers to handle SameSite cookie issues
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle SameSite cookie policy for embedded apps
+  if (req.headers['user-agent'] && req.headers['user-agent'].includes('Chrome')) {
+    res.header('Set-Cookie', 'SameSite=None; Secure');
+  }
+  
+  next();
+});
+
 // Configure express for cookie handling
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
