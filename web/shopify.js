@@ -20,11 +20,11 @@ const shopify = shopifyApp({
   auth: {
     path: "/api/auth",
     callbackPath: "/api/auth/callback",
-  },
-  webhooks: {
-    path: "/api/webhooks",  },
-  // This should be replaced with your preferred storage strategy
+  },  webhooks: {
+    path: "/api/webhooks",
+  },  // This should be replaced with your preferred storage strategy
   sessionStorage: new SQLiteSessionStorage(DB_PATH),
+  useOnlineTokens: false,
 });
 
 export default shopify;

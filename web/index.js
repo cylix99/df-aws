@@ -20,6 +20,13 @@ const STATIC_PATH =
 
 const app = express();
 
+// Configure session cookies for embedded apps
+app.set('trust proxy', 1);
+
+// Configure express for cookie handling
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 const reqInterceptor = axios.interceptors.request.use(
   (config) => {
     console.log("Request Interceptor:", config);
@@ -59,8 +66,6 @@ app.post(
 // also add a proxy rule for them in web/frontend/vite.config.js
 
 app.use("/api/*", shopify.validateAuthenticatedSession());
-
-app.use(express.json());
 
 function convertLineItemsEmail(items) {
   let groupedItems = {};
