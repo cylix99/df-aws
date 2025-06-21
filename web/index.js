@@ -349,7 +349,7 @@ app.post("/api/call/graphql", async (req, res) => {
       },
     });
 
-    console.log("api response", response?.body);
+    console.log("api response", JSON.stringify(response?.body, null, 2));
 
     res
       .status(200)
