@@ -214,7 +214,6 @@ export default function Order() {
       setIsLoading(false);
     }
   };
-
   const checkbulkrequest = async () => {
     fetch("/api/call/graphql", {
       method: "POST",
@@ -228,6 +227,17 @@ export default function Order() {
         console.log("checkbulkrequest", data);
         setStatus(`Status: ${data?.currentBulkOperation?.status}`);
         setCurrentId(data.currentBulkOperation.id);
+        
+        // If bulk operation is still running (CREATED or RUNNING), keep polling
+        if (
+          data?.currentBulkOperation?.status === "CREATED" ||
+          data?.currentBulkOperation?.status === "RUNNING"
+        ) {
+          console.log("Bulk operation still running, will check again in 1 second");
+          setTimeout(checkbulkrequest, 1000);
+          return;
+        }
+        
         if (
           data?.currentBulkOperation?.objectCount === "0" &&
           data?.currentBulkOperation?.status === "COMPLETED"
