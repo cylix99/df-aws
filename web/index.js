@@ -54,29 +54,81 @@ app.post(
 // Add some debugging middleware before session validation
 app.use("/api/*", (req, res, next) => {
   // Skip webhook endpoints
-  if (req.path.includes('/webhooks')) {
+  if (req.path.includes("/webhooks")) {
     return next();
   }
-  
+
   console.log(`API request to ${req.path}, session info:`, {
     hasShopifyLocals: !!res.locals.shopify,
     sessionId: res.locals.shopify?.session?.id,
     shop: res.locals.shopify?.session?.shop,
-    authorization: req.headers.authorization ? "Bearer token present" : "No authorization header",
+    authorization: req.headers.authorization
+      ? "Bearer token present"
+      : "No authorization header",
   });
   next();
 });
 
 // All endpoints after this point will require an active session (except webhooks)
-app.use("/api/*", (req, res, next) => {
+app.use("/api/*", async (req, res, next) => {
   // Skip webhook endpoints and auth endpoints
-  if (req.path.includes('/webhooks') || req.path.includes('/auth')) {
+  if (req.path.includes("/webhooks") || req.path.includes("/auth")) {
     return next();
   }
-  
-  console.log('[SESSION] Using shopify validateAuthenticatedSession middleware');
-  
-  // Use the shopify session validation middleware
+
+  console.log("[SESSION] Processing API request to:", req.path);
+
+  // For embedded apps, try to get the session from the session token first
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const sessionToken = authHeader.substring(7);
+      console.log("[SESSION] Found session token in Authorization header");
+      try {
+        // Decode and validate the session token
+        const payload = await shopify.api.session.decodeSessionToken(
+          sessionToken
+        );
+        console.log("[SESSION] Decoded session token payload:", {
+          iss: payload.iss,
+          dest: payload.dest,
+          aud: payload.aud,
+          sub: payload.sub,
+          exp: payload.exp,
+          iat: payload.iat,
+        });
+
+        // Extract shop from the issuer
+        const shop = payload.iss.replace("https://", "").replace("/admin", "");
+
+        // Try to get the offline session for this shop
+        const offlineSessionId = shopify.api.session.getOfflineId(shop);
+        const offlineSession = await shopify.config.sessionStorage.loadSession(
+          offlineSessionId
+        );
+
+        if (offlineSession) {
+          console.log("[SESSION] Found offline session for shop:", shop);
+          res.locals.shopify = { session: offlineSession };
+          return next();
+        } else {
+          console.log("[SESSION] No offline session found for shop:", shop);
+        }
+      } catch (tokenError) {
+        console.log(
+          "[SESSION] Session token validation failed:",
+          tokenError.message
+        );
+      }
+    } else {
+      console.log("[SESSION] No Bearer token found in Authorization header");
+    }
+  } catch (error) {
+    console.log("[SESSION] Error processing session token:", error.message);
+  }
+
+  // Fall back to traditional session validation
+  console.log("[SESSION] Falling back to traditional session validation");
   return shopify.validateAuthenticatedSession()(req, res, next);
 });
 
@@ -223,9 +275,11 @@ app.get("/api/shop", async (_req, res) => {
       sessionId: res.locals.shopify?.session?.id,
       shop: res.locals.shopify?.session?.shop,
       isOnline: res.locals.shopify?.session?.isOnline,
-      accessToken: res.locals.shopify?.session?.accessToken ? "present" : "missing",
+      accessToken: res.locals.shopify?.session?.accessToken
+        ? "present"
+        : "missing",
     });
-    
+
     if (!res.locals.shopify?.session) {
       console.log("No session found in res.locals.shopify");
       return res.status(401).json({ error: "No session found" });
@@ -234,7 +288,7 @@ app.get("/api/shop", async (_req, res) => {
     const shopData = await shopify.api.rest.Shop.all({
       session: res.locals.shopify.session,
     });
-    
+
     console.log("Shop data retrieved successfully");
     res.status(200).send(shopData);
   } catch (error) {
