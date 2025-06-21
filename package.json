@@ -10,7 +10,7 @@
     "info": "shopify app info",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
-    "start": "npm run serve --prefix web",
+    "start": "npm start --prefix web",
     "postinstall": "npm --prefix web install"
   },
   "dependencies": {
@@ -23,6 +23,9 @@
   },
   "author": "ian",
   "private": true,
+  "engines": {
+    "node": ">=20.10.0"
+  },
   "workspaces": [
     "web",
     "web/frontend",
