@@ -52,9 +52,9 @@ export default function Order() {
   const [orders, setOrders] = useState(null);
   const [rows, setRows] = useState(null);
   const [status, setStatus] = useState("Not Submitted");
-  const [rerun, setRerun] = useState(0);
-  const [active, setActive] = useState(false);
+  const [rerun, setRerun] = useState(0);  const [active, setActive] = useState(false);
   const [currentId, setCurrentId] = useState(null);
+  const [processingBulk, setProcessingBulk] = useState(false);
 
   const [pickActive, setPickActive] = useState(false);
   const [pickOrders, setPickOrders] = useState(null);
@@ -180,8 +180,8 @@ export default function Order() {
   };
 
   const [isLoading, setIsLoading] = useState(false);
-
   const createbulkrequest = async () => {
+    console.log("🚀 createbulkrequest called");
     setIsLoading(true);
     try {
       fetch("/api/call/graphql", {
@@ -198,8 +198,7 @@ export default function Order() {
             data_call?.bulkOperationRunQuery?.bulkOperation?.status
               ? data_call?.bulkOperationRunQuery?.bulkOperation?.status
               : data_call?.bulkOperationRunQuery?.userErrors[0]?.message
-          );
-          if (
+          );          if (
             data_call?.bulkOperationRunQuery?.bulkOperation?.status ===
             "CREATED"
           ) {
@@ -207,6 +206,10 @@ export default function Order() {
             console.log({ data_call });
             checkbulkrequest();
           }
+        })
+        .catch((error) => {
+          console.error("❌ Error creating bulk request:", error);
+          setStatus("Error creating bulk operation");
         });
     } catch (error) {
       handleError(error);
@@ -214,6 +217,13 @@ export default function Order() {
       setIsLoading(false);
     }
   };  const checkbulkrequest = async () => {
+    console.log("🔍 checkbulkrequest called. processingBulk:", processingBulk);
+    
+    if (processingBulk) {
+      console.log("⏸️ Already processing bulk operation, skipping...");
+      return;
+    }
+    
     fetch("/api/call/graphql", {
       method: "POST",
       body: JSON.stringify({
@@ -224,14 +234,17 @@ export default function Order() {
       .then((response) => response.json())
       .then((data) => {
         console.log("checkbulkrequest", data);
-        
+
         // If there's no current bulk operation, start a new one
-        if (!data?.currentBulkOperation || data?.currentBulkOperation === null) {
+        if (
+          !data?.currentBulkOperation ||
+          data?.currentBulkOperation === null
+        ) {
           console.log("No current bulk operation found, creating new one");
           createbulkrequest();
           return;
         }
-        
+
         setStatus(`Status: ${data?.currentBulkOperation?.status}`);
         setCurrentId(data.currentBulkOperation.id);
 
@@ -245,9 +258,7 @@ export default function Order() {
           );
           setTimeout(checkbulkrequest, 1000);
           return;
-        }
-
-        if (
+        }if (
           data?.currentBulkOperation?.objectCount === "0" &&
           data?.currentBulkOperation?.status === "COMPLETED"
         ) {
@@ -257,7 +268,18 @@ export default function Order() {
           data?.currentBulkOperation?.url !== null &&
           data?.currentBulkOperation?.status === "COMPLETED"
         ) {
-          console.log("✅ Bulk operation completed! Downloading results from:", data?.currentBulkOperation?.url);
+          console.log(
+            "✅ Bulk operation completed! Downloading results from:",
+            data?.currentBulkOperation?.url
+          );          console.log(
+            "📊 Object count:",
+            data?.currentBulkOperation?.objectCount
+          );
+          
+          // Set processing state to prevent concurrent operations
+          console.log("🔒 Setting processingBulk to true");
+          setProcessingBulk(true);
+          
           axios({
             method: "GET",
             url: data?.currentBulkOperation?.url,
@@ -267,7 +289,11 @@ export default function Order() {
               console.log("📦 Raw bulk operation response:", response);
               if (response) {
                 let responseOrders = response.data.split("\n").reverse();
-                console.log("📋 Split orders data:", responseOrders.length, "lines");
+                console.log(
+                  "📋 Split orders data:",
+                  responseOrders.length,
+                  "lines"
+                );
                 let groupedOrders = readJsonl(responseOrders);
                 console.log("🔄 Processed orders:", { groupedOrders });
                 setOrders(groupedOrders);
@@ -285,27 +311,50 @@ export default function Order() {
                     rmShipment: order.royalMailShipmentNumber?.value,
                     splitShipping: splitShippingAttr?.value === "true",
                     message: null,
-                    tags: order.tags,                  };
-                });
-                console.log("📊 Setting rows with data:", arr);
+                    tags: order.tags,
+                  };
+                });                console.log("📊 Setting rows with data:", arr);
                 setRows(arr);
+                console.log("🔓 Setting processingBulk to false - success");
+                setProcessingBulk(false); // Reset processing state after successful completion
               } else {
                 console.error("❌ No response data:", response);
+                console.log("🔓 Setting processingBulk to false - no data");
+                setProcessingBulk(false); // Reset processing state on error
               }
-            })            .catch((error) => {
-              console.error("❌ Error downloading bulk operation results:", error.message);
+            })
+            .catch((error) => {
+              console.error(
+                "❌ Error downloading bulk operation results:",
+                error.message
+              );
+              console.log("🔓 Setting processingBulk to false - error");
+              setProcessingBulk(false); // Reset processing state on error
             });
         } else {
-          console.log("⏳ Bulk operation not ready yet. Status:", data?.currentBulkOperation?.status, "URL:", data?.currentBulkOperation?.url, "Rerun count:", rerun);
+          console.log(
+            "⏳ Bulk operation not ready yet. Status:",
+            data?.currentBulkOperation?.status,
+            "URL:",
+            data?.currentBulkOperation?.url,
+            "Rerun count:",
+            rerun
+          );
           if (rerun < 5) {
             setRerun(rerun + 1);
-            setTimeout(checkbulkrequest, 500);
-          } else {
+            setTimeout(checkbulkrequest, 500);          } else {
             console.log("❌ Max retries reached. Setting empty rows.");
             setStatus("No orders found");
             setRows([]);
+            console.log("🔓 Setting processingBulk to false - max retries");
+            setProcessingBulk(false); // Reset processing state on max retries
           }
         }
+      })      .catch((error) => {
+        console.error("❌ Error checking bulk request:", error);
+        console.log("🔓 Setting processingBulk to false - fetch error");
+        setProcessingBulk(false); // Reset processing state on fetch error
+        setStatus("Error checking bulk operation");
       });
   };
 
