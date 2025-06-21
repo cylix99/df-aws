@@ -13,19 +13,17 @@
   "type": "module",
   "engines": {
     "node": ">=20.10.0"
-  },
-  "dependencies": {
+  },  "dependencies": {
     "@aws-sdk/client-ses": "^3.507.0",
     "@shopify/shopify-app-express": "^2.1.1",
     "@shopify/shopify-app-session-storage-postgresql": "^1.0.1",
-    "@shopify/shopify-app-session-storage-sqlite": "^4.0.18",
+    "@shopify/shopify-app-session-storage-memory": "^1.0.0",
     "axios": "^1.4.0",
     "bwip-js": "^4.5.1",
     "compression": "^1.7.4",
     "cross-env": "^7.0.3",
     "nodemailer": "^6.9.9",
-    "serve-static": "^1.14.1",
-    "sqlite3": "^5.1.6"
+    "serve-static": "^1.14.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.15",

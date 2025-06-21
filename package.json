@@ -2,8 +2,7 @@
   "name": "df-v2",
   "version": "1.0.0",
   "main": "web/index.js",
-  "license": "UNLICENSED",
-  "scripts": {
+  "license": "UNLICENSED",  "scripts": {
     "shopify": "shopify",
     "build": "npm run build --prefix web",
     "dev": "shopify app dev",
@@ -11,7 +10,7 @@
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
     "start": "npm start --prefix web",
-    "postinstall": "npm --prefix web install"
+    "postinstall": "npm --prefix web install --legacy-peer-deps"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.507.0",
