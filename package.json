@@ -5,12 +5,13 @@
   "license": "UNLICENSED",
   "scripts": {
     "shopify": "shopify",
-    "build": "SHOPIFY_API_KEY=your_api_key_here shopify app build",
+    "build": "npm run build --prefix web",
     "dev": "shopify app dev",
     "info": "shopify app info",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
-    "postinstall": "cd web && npm install"
+    "start": "npm run serve --prefix web",
+    "postinstall": "npm --prefix web install"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.507.0",

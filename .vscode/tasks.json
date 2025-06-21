@@ -1,0 +1,13 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "web:start",
+      "type": "shell",
+      "command": "npm start --prefix web",
+      "problemMatcher": [],
+      "isBackground": false,
+      "group": "build"
+    }
+  ]
+}
