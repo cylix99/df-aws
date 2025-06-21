@@ -75,9 +75,9 @@ export default function Order() {
       clearAllToasts();
     }
   }, [clearAllToasts]);
-
   useEffect(() => {
-    createbulkrequest();
+    // First check if there's already a running bulk operation
+    checkbulkrequest();
   }, []);
 
   const BULK_ORDERS = `
@@ -213,8 +213,7 @@ export default function Order() {
     } finally {
       setIsLoading(false);
     }
-  };
-  const checkbulkrequest = async () => {
+  };  const checkbulkrequest = async () => {
     fetch("/api/call/graphql", {
       method: "POST",
       body: JSON.stringify({
@@ -225,6 +224,14 @@ export default function Order() {
       .then((response) => response.json())
       .then((data) => {
         console.log("checkbulkrequest", data);
+        
+        // If there's no current bulk operation, start a new one
+        if (!data?.currentBulkOperation || data?.currentBulkOperation === null) {
+          console.log("No current bulk operation found, creating new one");
+          createbulkrequest();
+          return;
+        }
+        
         setStatus(`Status: ${data?.currentBulkOperation?.status}`);
         setCurrentId(data.currentBulkOperation.id);
 
