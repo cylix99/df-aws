@@ -194,21 +194,26 @@ export default function Order() {
       })
         .then((response) => response.json())        .then((data_call) => {
           console.log("Bulk operation creation response:", data_call);
-          setStatus(
-            data_call?.bulkOperationRunQuery?.bulkOperation?.status
-              ? data_call?.bulkOperationRunQuery?.bulkOperation?.status
-              : data_call?.bulkOperationRunQuery?.userErrors[0]?.message
-          );
           
-          if (
-            data_call?.bulkOperationRunQuery?.bulkOperation?.status ===
-            "CREATED"
-          ) {
+          // Check if there are user errors
+          if (data_call?.bulkOperationRunQuery?.userErrors?.length > 0) {
+            const errorMessage = data_call.bulkOperationRunQuery.userErrors[0].message;
+            console.error("Failed to create bulk operation:", errorMessage);
+            setStatus(`Error: ${errorMessage}`);
+            return;
+          }
+          
+          // Set status from the bulk operation response
+          const bulkOpStatus = data_call?.bulkOperationRunQuery?.bulkOperation?.status;
+          setStatus(bulkOpStatus || "Unknown status");
+          
+          if (bulkOpStatus === "CREATED") {
             console.log("✅ Bulk operation created successfully, starting polling");
             // Start polling immediately after creation
             setTimeout(checkbulkrequest, 1000);
           } else {
-            console.error("Failed to create bulk operation:", data_call?.bulkOperationRunQuery?.userErrors);
+            console.error("Unexpected bulk operation status:", bulkOpStatus);
+            setStatus(`Unexpected status: ${bulkOpStatus}`);
           }
         })
         .catch((error) => {
