@@ -13,7 +13,8 @@
   "type": "module",
   "engines": {
     "node": ">=20.10.0"
-  },  "dependencies": {
+  },
+  "dependencies": {
     "@aws-sdk/client-ses": "^3.507.0",
     "@shopify/shopify-app-express": "^2.1.1",
     "@shopify/shopify-app-session-storage-postgresql": "^1.0.1",
