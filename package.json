@@ -2,7 +2,8 @@
   "name": "df-v2",
   "version": "1.0.0",
   "main": "web/index.js",
-  "license": "UNLICENSED",  "scripts": {
+  "license": "UNLICENSED",
+  "scripts": {
     "shopify": "shopify",
     "build": "npm run build --prefix web",
     "dev": "shopify app dev",
