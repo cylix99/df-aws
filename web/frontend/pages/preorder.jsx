@@ -81,7 +81,7 @@ export default function Order() {
     setError(null);
     setStatus("Creating bulk operation...");
     createbulkrequest();
-    
+
     // Cleanup polling on unmount
     return () => {
       if (pollingTimeout) {
@@ -133,7 +133,7 @@ export default function Order() {
       console.log("Preorder page: Creating new bulk operation");
       setStatus("Creating bulk operation...");
       setError(null);
-      
+
       const response = await fetch("/api/call/graphql", {
         method: "POST",
         body: JSON.stringify({
@@ -153,7 +153,9 @@ export default function Order() {
       // Handle GraphQL errors
       if (data_call.errors) {
         console.error("Preorder page: GraphQL errors:", data_call.errors);
-        setError("Failed to create bulk operation: " + data_call.errors[0].message);
+        setError(
+          "Failed to create bulk operation: " + data_call.errors[0].message
+        );
         setStatus("Error creating bulk operation");
         setIsLoading(false);
         return;
@@ -171,12 +173,17 @@ export default function Order() {
       }
 
       if (bulkOp?.status === "CREATED") {
-        console.log("Preorder page: Bulk operation created successfully, starting polling");
+        console.log(
+          "Preorder page: Bulk operation created successfully, starting polling"
+        );
         setStatus("Bulk operation created, polling for completion...");
         setRerun(0); // Reset retry counter
         checkbulkrequest();
       } else {
-        console.error("Preorder page: Unexpected bulk operation status:", bulkOp?.status);
+        console.error(
+          "Preorder page: Unexpected bulk operation status:",
+          bulkOp?.status
+        );
         setError("Failed to create bulk operation");
         setStatus("Failed to create bulk operation");
         setIsLoading(false);
@@ -190,8 +197,10 @@ export default function Order() {
   };
   const checkbulkrequest = async () => {
     try {
-      console.log(`Preorder page: Checking bulk operation status (attempt ${rerun + 1})`);
-      
+      console.log(
+        `Preorder page: Checking bulk operation status (attempt ${rerun + 1})`
+      );
+
       const response = await fetch("/api/call/graphql", {
         method: "POST",
         body: JSON.stringify({
@@ -217,7 +226,7 @@ export default function Order() {
       }
 
       const data = result.data?.currentBulkOperation;
-      
+
       if (!data) {
         console.error("Preorder page: No bulk operation data in response");
         setError("No bulk operation found");
@@ -232,7 +241,9 @@ export default function Order() {
 
       // Handle completed operation with no results (error case)
       if (data.objectCount === "0" && data.status === "COMPLETED") {
-        console.error("Preorder page: Bulk operation completed but returned 0 objects, retrying...");
+        console.error(
+          "Preorder page: Bulk operation completed but returned 0 objects, retrying..."
+        );
         setStatus("No results found, creating new bulk operation...");
         setRerun(0); // Reset counter
         createbulkrequest();
@@ -241,92 +252,129 @@ export default function Order() {
 
       // Handle successful completion
       if (data.url !== null && data.status === "COMPLETED") {
-        console.log("Preorder page: Bulk operation completed successfully, fetching data from:", data.url);
+        console.log(
+          "Preorder page: Bulk operation completed successfully, fetching data from:",
+          data.url
+        );
         setStatus("Bulk operation completed, fetching data...");
-        
+
         try {
-          const axiosResponse = await axios.get(data.url);        if (axiosResponse && axiosResponse.data) {
-          console.log("Preorder page: Successfully fetched bulk operation data");
-          setStatus("📋 Parsing preorder data...");
-          let responseOrders = axiosResponse.data;
-          let groupedOrders = readJsonl(responseOrders);
-          console.log("Preorder page: Grouped orders:", groupedOrders);
-          setOrders(groupedOrders);
+          const axiosResponse = await axios.get(data.url);
+          if (axiosResponse && axiosResponse.data) {
+            console.log(
+              "Preorder page: Successfully fetched bulk operation data"
+            );
+            setStatus("📋 Parsing preorder data...");
+            let responseOrders = axiosResponse.data;
+            let groupedOrders = readJsonl(responseOrders);
+            console.log("Preorder page: Grouped orders:", groupedOrders);
+            setOrders(groupedOrders);
 
-          if (groupedOrders && groupedOrders.length > 0) {
-            setStatus(`🔄 Processing ${groupedOrders.length} preorders...`);
-            let totalValueRunning = 0;
-            let arr = groupedOrders.map((order) => {
-              let mainId = order.id.replace("gid://shopify/Order/", "");
-              totalValueRunning += parseFloat(
-                order.totalPriceSet?.presentmentMoney?.amount || 0
+            if (groupedOrders && groupedOrders.length > 0) {
+              setStatus(`🔄 Processing ${groupedOrders.length} preorders...`);
+              let totalValueRunning = 0;
+              let arr = groupedOrders.map((order) => {
+                let mainId = order.id.replace("gid://shopify/Order/", "");
+                totalValueRunning += parseFloat(
+                  order.totalPriceSet?.presentmentMoney?.amount || 0
+                );
+                return {
+                  id: mainId,
+                  orderNo: order.name,
+                  name: order.customer?.displayName,
+                  email: order.customer?.email,
+                  cmc: order.shippingAddress?.country,
+                  rmTracking: order.royalMailTrackingNumber?.value,
+                  rmShipment: order.royalMailShipmentNumber?.value,
+                  fulfilmentStatus:
+                    order.FulfillmentOrder?.[0]?.status ||
+                    order.fulfillment?.edges?.[0]?.node?.status,
+                  items: convertLineItems(order),
+                  message: null,
+                  tags: order.tags,
+                };
+              });
+
+              setTotalValue(totalValueRunning);
+              setRows(arr);
+              setStatus(
+                `✅ Successfully loaded ${
+                  groupedOrders.length
+                } preorders (Total value: £${totalValueRunning.toFixed(2)})`
               );
-              return {
-                id: mainId,
-                orderNo: order.name,
-                name: order.customer?.displayName,
-                email: order.customer?.email,
-                cmc: order.shippingAddress?.country,
-                rmTracking: order.royalMailTrackingNumber?.value,
-                rmShipment: order.royalMailShipmentNumber?.value,
-                fulfilmentStatus: order.FulfillmentOrder?.[0]?.status || order.fulfillment?.edges?.[0]?.node?.status,
-                items: convertLineItems(order),
-                message: null,
-                tags: order.tags,
-              };
-            });
-
-            setTotalValue(totalValueRunning);
-            setRows(arr);
-            setStatus(`✅ Successfully loaded ${groupedOrders.length} preorders (Total value: £${totalValueRunning.toFixed(2)})`);
-            console.log(`Preorder page: Successfully processed ${groupedOrders.length} preorders`);
+              console.log(
+                `Preorder page: Successfully processed ${groupedOrders.length} preorders`
+              );
+            } else {
+              setStatus("No preorders found");
+              setRows([]);
+              console.log("Preorder page: No preorders found in results");
+            }
+            setIsLoading(false);
           } else {
-            setStatus("No preorders found");
-            setRows([]);
-            console.log("Preorder page: No preorders found in results");
-          }
-          setIsLoading(false);
-          } else {
-            console.error("Preorder page: No response data found from bulk operation URL");
+            console.error(
+              "Preorder page: No response data found from bulk operation URL"
+            );
             setError("No data received from bulk operation");
             setStatus("No data received");
             setIsLoading(false);
           }
         } catch (error) {
-          console.error("Preorder page: Error fetching bulk operation data:", error);
+          console.error(
+            "Preorder page: Error fetching bulk operation data:",
+            error
+          );
           setError("Failed to fetch bulk operation data: " + error.message);
           setStatus("Error fetching data");
           setIsLoading(false);
-        }      } else if (data.status === "RUNNING" || data.status === "CREATED") {
+        }
+      } else if (data.status === "RUNNING" || data.status === "CREATED") {
         // Continue polling
-        const pollingMessage = data.status === "CREATED" 
-          ? "📝 Bulk operation created, waiting for processing to start..." 
-          : `🔄 Processing preorders... (${data.objectCount || 'checking'} found so far)`;
-        console.log(`Preorder page: Bulk operation still ${data.status}, continuing to poll...`);
+        const pollingMessage =
+          data.status === "CREATED"
+            ? "📝 Bulk operation created, waiting for processing to start..."
+            : `🔄 Processing preorders... (${
+                data.objectCount || "checking"
+              } found so far)`;
+        console.log(
+          `Preorder page: Bulk operation still ${data.status}, continuing to poll...`
+        );
         setStatus(pollingMessage);
         setRerun(rerun + 1);
-        
+
         const timeout = setTimeout(() => {
           checkbulkrequest();
         }, 1000); // Poll every second
-        
+
         setPollingTimeout(timeout);
       } else if (data.status === "FAILED" || data.status === "CANCELED") {
-        console.error("Preorder page: Bulk operation failed or was canceled:", data.status);
+        console.error(
+          "Preorder page: Bulk operation failed or was canceled:",
+          data.status
+        );
         setError(`Bulk operation ${data.status.toLowerCase()}`);
         setStatus(`Bulk operation ${data.status.toLowerCase()}`);
-        setIsLoading(false);      } else {
+        setIsLoading(false);
+      } else {
         // Unknown status, continue polling for a while then give up
-        if (rerun < 30) { // Increased retry limit
-          console.log(`Preorder page: Unknown status ${data.status}, retrying...`);
-          setStatus(`⏳ Waiting for bulk operation... (attempt ${rerun + 1}/30, status: ${data.status})`);
+        if (rerun < 30) {
+          // Increased retry limit
+          console.log(
+            `Preorder page: Unknown status ${data.status}, retrying...`
+          );
+          setStatus(
+            `⏳ Waiting for bulk operation... (attempt ${
+              rerun + 1
+            }/30, status: ${data.status})`
+          );
           setRerun(rerun + 1);
-          
+
           const timeout = setTimeout(() => {
             checkbulkrequest();
           }, 1000);
-          
-          setPollingTimeout(timeout);        } else {
+
+          setPollingTimeout(timeout);
+        } else {
           console.error("Preorder page: Too many retries, giving up");
           setError("Bulk operation timed out");
           setStatus("❌ Operation timed out after 30 attempts");
@@ -335,17 +383,18 @@ export default function Order() {
       }
     } catch (error) {
       console.error("Preorder page: Error checking bulk operation:", error);
-        // Retry on network errors, but not indefinitely
+      // Retry on network errors, but not indefinitely
       if (rerun < 10) {
         console.log("Preorder page: Retrying after network error...");
         setStatus(`⚠️ Network error, retrying... (attempt ${rerun + 1}/10)`);
         setRerun(rerun + 1);
-        
+
         const timeout = setTimeout(() => {
           checkbulkrequest();
         }, 2000); // Wait longer after errors
-        
-        setPollingTimeout(timeout);      } else {
+
+        setPollingTimeout(timeout);
+      } else {
         setError("Network error: " + error.message);
         setStatus(`❌ Network error after 10 attempts: ${error.message}`);
         setIsLoading(false);
@@ -355,13 +404,13 @@ export default function Order() {
 
   const refreshOrders = () => {
     console.log("Preorder page: Manual refresh triggered");
-    
+
     // Clear any existing polling timeout
     if (pollingTimeout) {
       clearTimeout(pollingTimeout);
       setPollingTimeout(null);
     }
-    
+
     // Reset state
     setIsLoading(true);
     setError(null);
@@ -370,7 +419,7 @@ export default function Order() {
     setRows(null);
     setTotalValue(0);
     setStatus("Creating fresh bulk operation...");
-    
+
     // Start fresh bulk operation
     createbulkrequest();
   };
@@ -825,7 +874,8 @@ Puzzle Galore
                         value={filterValue}
                       />
                     </Box>
-                  </InlineStack>                  {status && (
+                  </InlineStack>{" "}
+                  {status && (
                     <Box
                       padding="4"
                       background="bg-surface-secondary"
@@ -836,31 +886,41 @@ Puzzle Galore
                         <Text variant="headingSm">Bulk Operation Status</Text>
                         <ProgressBar
                           progress={
-                            status.includes("✅") ? 100 :
-                            status.includes("📋") || status.includes("🔄") ? 80 :
-                            status.includes("Processing") || status.includes("RUNNING") ? 60 :
-                            status.includes("created") || status.includes("📝") ? 40 :
-                            status.includes("Creating") ? 20 :
-                            status.includes("❌") || status.includes("Error") ? 0 :
-                            30
+                            status.includes("✅")
+                              ? 100
+                              : status.includes("📋") || status.includes("🔄")
+                              ? 80
+                              : status.includes("Processing") ||
+                                status.includes("RUNNING")
+                              ? 60
+                              : status.includes("created") ||
+                                status.includes("📝")
+                              ? 40
+                              : status.includes("Creating")
+                              ? 20
+                              : status.includes("❌") ||
+                                status.includes("Error")
+                              ? 0
+                              : 30
                           }
                           size="small"
                           tone={
-                            status.includes("✅") ? "success" :
-                            status.includes("❌") || status.includes("Error") ? "critical" :
-                            status.includes("⚠️") ? "attention" :
-                            "primary"
+                            status.includes("✅")
+                              ? "success"
+                              : status.includes("❌") ||
+                                status.includes("Error")
+                              ? "critical"
+                              : status.includes("⚠️")
+                              ? "attention"
+                              : "primary"
                           }
                         />
                         <Text>{status}</Text>
                       </BlockStack>
                     </Box>
-                  )}<ButtonGroup>
-                    <Button
-                      onClick={refreshOrders}
-                      loading={isLoading}
-                      primary
-                    >
+                  )}
+                  <ButtonGroup>
+                    <Button onClick={refreshOrders} loading={isLoading} primary>
                       Refresh Orders
                     </Button>
                     <Button
@@ -874,7 +934,8 @@ Puzzle Galore
                   </ButtonGroup>
                 </BlockStack>
               </Box>
-            </Card>            <Box paddingBlockStart="6">
+            </Card>{" "}
+            <Box paddingBlockStart="6">
               <Card>
                 {error && (
                   <Box paddingBlockEnd="4">
@@ -888,7 +949,7 @@ Puzzle Galore
                     </Banner>
                   </Box>
                 )}
-                
+
                 {isLoading && !error && (
                   <Box padding="4">
                     <BlockStack gap="4">
@@ -899,8 +960,11 @@ Puzzle Galore
                     </BlockStack>
                   </Box>
                 )}
-                
-                {!isLoading && !error && filteredOrders && filteredOrders.length > 0 ? (
+
+                {!isLoading &&
+                !error &&
+                filteredOrders &&
+                filteredOrders.length > 0 ? (
                   <IndexTable
                     resourceName={resourceName}
                     itemCount={filteredOrders.length}
@@ -919,7 +983,8 @@ Puzzle Galore
                       { title: "Items", width: "20%" },
                     ]}
                   >
-                    {rowMarkup}                  </IndexTable>
+                    {rowMarkup}{" "}
+                  </IndexTable>
                 ) : !isLoading && !error ? (
                   <EmptyState
                     heading="No preorders found"
@@ -929,7 +994,10 @@ Puzzle Galore
                     }}
                     image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                   >
-                    <p>No pre-orders match the current filter. Try refreshing or check your filter settings.</p>
+                    <p>
+                      No pre-orders match the current filter. Try refreshing or
+                      check your filter settings.
+                    </p>
                   </EmptyState>
                 ) : null}
               </Card>

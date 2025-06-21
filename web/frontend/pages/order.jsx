@@ -198,7 +198,8 @@ export default function Order() {
         }),
         headers: { "Content-Type": "application/json" },
       })
-        .then((response) => response.json())        .then((data_call) => {
+        .then((response) => response.json())
+        .then((data_call) => {
           console.log("Bulk operation creation response:", data_call);
 
           // Check if there are user errors
@@ -255,7 +256,8 @@ export default function Order() {
       }),
       headers: { "Content-Type": "application/json" },
     })
-      .then((response) => response.json())      .then((data) => {
+      .then((response) => response.json())
+      .then((data) => {
         console.log("checkbulkrequest polling result:", data);
 
         // If there's no current bulk operation, something went wrong
@@ -272,7 +274,7 @@ export default function Order() {
 
         const currentBulkOp = data.data.currentBulkOperation;
         setStatus(`Status: ${currentBulkOp.status}`);
-        setCurrentId(currentBulkOp.id);        // If bulk operation is still running (CREATED or RUNNING), keep polling
+        setCurrentId(currentBulkOp.id); // If bulk operation is still running (CREATED or RUNNING), keep polling
         if (
           currentBulkOp.status === "CREATED" ||
           currentBulkOp.status === "RUNNING"
@@ -280,9 +282,12 @@ export default function Order() {
           console.log(
             "Bulk operation still running, will check again in 1 second"
           );
-          const pollingMessage = currentBulkOp.status === "CREATED" 
-            ? "Bulk operation created, waiting for processing to start..." 
-            : `Processing orders... (${currentBulkOp.objectCount || 'checking'} found so far)`;
+          const pollingMessage =
+            currentBulkOp.status === "CREATED"
+              ? "Bulk operation created, waiting for processing to start..."
+              : `Processing orders... (${
+                  currentBulkOp.objectCount || "checking"
+                } found so far)`;
           setStatus(pollingMessage);
           setTimeout(checkbulkrequest, 1000);
           return;
@@ -300,15 +305,15 @@ export default function Order() {
         } else if (
           currentBulkOp.url !== null &&
           currentBulkOp.status === "COMPLETED"
-        ) {          console.log(
+        ) {
+          console.log(
             "✅ Bulk operation completed! Downloading results from:",
             currentBulkOp.url
           );
-          console.log(
-            "📊 Object count:",
-            currentBulkOp.objectCount
+          console.log("📊 Object count:", currentBulkOp.objectCount);
+          setStatus(
+            `✅ Bulk operation completed! Processing ${currentBulkOp.objectCount} orders...`
           );
-          setStatus(`✅ Bulk operation completed! Processing ${currentBulkOp.objectCount} orders...`);
 
           // Set processing state to prevent concurrent operations
           console.log("🔒 Setting processingBulk to true");
@@ -319,21 +324,24 @@ export default function Order() {
             url: currentBulkOp.url,
             //`https://guq6e1oc76.execute-api.eu-west-2.amazonaws.com/?url=${encodeURIComponent(data?.currentBulkOperation?.url)}`,
           })
-            .then(async (response) => {                console.log("📦 Raw bulk operation response:", response);
-                if (response) {
-                  setStatus("📋 Parsing order data...");
-                  let responseOrders = response.data.split("\n").reverse();
-                  console.log(
-                    "📋 Split orders data:",
-                    responseOrders.length,
-                    "lines"
-                  );
-                  setStatus(`🔄 Processing ${responseOrders.length} order records...`);
-                  let groupedOrders = readJsonl(responseOrders);
-                  console.log("🔄 Processed orders:", { groupedOrders });
-                  setOrders(groupedOrders);
-                  setStatus(`📊 Finalizing ${groupedOrders.length} orders...`);
-                  let arr = groupedOrders.map((order) => {
+            .then(async (response) => {
+              console.log("📦 Raw bulk operation response:", response);
+              if (response) {
+                setStatus("📋 Parsing order data...");
+                let responseOrders = response.data.split("\n").reverse();
+                console.log(
+                  "📋 Split orders data:",
+                  responseOrders.length,
+                  "lines"
+                );
+                setStatus(
+                  `🔄 Processing ${responseOrders.length} order records...`
+                );
+                let groupedOrders = readJsonl(responseOrders);
+                console.log("🔄 Processed orders:", { groupedOrders });
+                setOrders(groupedOrders);
+                setStatus(`📊 Finalizing ${groupedOrders.length} orders...`);
+                let arr = groupedOrders.map((order) => {
                   let mainId = order.id.replace("gid://shopify/Order/", "");
                   const splitShippingAttr = order.customAttributes.find(
                     (attr) => attr.key === "split_preorder_shipping"
@@ -348,12 +356,15 @@ export default function Order() {
                     splitShipping: splitShippingAttr?.value === "true",
                     message: null,
                     tags: order.tags,
-                  };                  });
-                  console.log("📊 Setting rows with data:", arr);
-                  setRows(arr);
-                  setStatus(`✅ Successfully loaded ${groupedOrders.length} orders`);
-                  console.log("🔓 Setting processingBulk to false - success");
-                  setProcessingBulk(false); // Reset processing state after successful completion
+                  };
+                });
+                console.log("📊 Setting rows with data:", arr);
+                setRows(arr);
+                setStatus(
+                  `✅ Successfully loaded ${groupedOrders.length} orders`
+                );
+                console.log("🔓 Setting processingBulk to false - success");
+                setProcessingBulk(false); // Reset processing state after successful completion
               } else {
                 console.error("❌ No response data:", response);
                 console.log("🔓 Setting processingBulk to false - no data");
@@ -367,7 +378,9 @@ export default function Order() {
               );
               console.log("🔓 Setting processingBulk to false - error");
               setProcessingBulk(false); // Reset processing state on error
-            });        } else {          console.log(
+            });
+        } else {
+          console.log(
             "⏳ Bulk operation not ready yet. Status:",
             currentBulkOp.status,
             "URL:",
@@ -375,7 +388,9 @@ export default function Order() {
             "Rerun count:",
             rerun
           );
-          setStatus(`⏳ Waiting for bulk operation... (attempt ${rerun + 1}/5)`);
+          setStatus(
+            `⏳ Waiting for bulk operation... (attempt ${rerun + 1}/5)`
+          );
           if (rerun < 5) {
             setRerun(rerun + 1);
             setTimeout(checkbulkrequest, 500);
@@ -388,7 +403,8 @@ export default function Order() {
           }
         }
       })
-      .catch((error) => {        console.error("❌ Error checking bulk request:", error);
+      .catch((error) => {
+        console.error("❌ Error checking bulk request:", error);
         console.log("🔓 Setting processingBulk to false - fetch error");
         setProcessingBulk(false); // Reset processing state on fetch error
         setStatus(`❌ Error checking bulk operation: ${error.message}`);
@@ -885,37 +901,53 @@ export default function Order() {
           Refresh Orders
         </Button>
       }
-    >      {status && !status.startsWith("✅") && (
+    >
+      {" "}
+      {status && !status.startsWith("✅") && (
         <Layout.Section>
           <Banner
             title="Order Loading Status"
             status={
-              status.includes("Error") || status.includes("❌") 
-                ? "critical" 
-                : status.includes("✅") 
-                ? "success" 
-                : status.includes("⏳") || status.includes("Creating") || status.includes("Processing")
-                ? "info" 
+              status.includes("Error") || status.includes("❌")
+                ? "critical"
+                : status.includes("✅")
+                ? "success"
+                : status.includes("⏳") ||
+                  status.includes("Creating") ||
+                  status.includes("Processing")
+                ? "info"
                 : "warning"
             }
           >
             <BlockStack gap="2">
               <ProgressBar
                 progress={
-                  status.includes("✅") ? 100 :
-                  status.includes("📋") || status.includes("🔄") || status.includes("Finalizing") ? 80 :
-                  status.includes("Processing") || status.includes("RUNNING") ? 60 :
-                  status.includes("created") || status.includes("polling") ? 40 :
-                  status.includes("Creating") ? 20 :
-                  status.includes("❌") || status.includes("Error") ? 0 :
-                  30
+                  status.includes("✅")
+                    ? 100
+                    : status.includes("📋") ||
+                      status.includes("🔄") ||
+                      status.includes("Finalizing")
+                    ? 80
+                    : status.includes("Processing") ||
+                      status.includes("RUNNING")
+                    ? 60
+                    : status.includes("created") || status.includes("polling")
+                    ? 40
+                    : status.includes("Creating")
+                    ? 20
+                    : status.includes("❌") || status.includes("Error")
+                    ? 0
+                    : 30
                 }
                 size="small"
                 tone={
-                  status.includes("✅") ? "success" :
-                  status.includes("❌") || status.includes("Error") ? "critical" :
-                  status.includes("⏳") ? "attention" :
-                  "primary"
+                  status.includes("✅")
+                    ? "success"
+                    : status.includes("❌") || status.includes("Error")
+                    ? "critical"
+                    : status.includes("⏳")
+                    ? "attention"
+                    : "primary"
                 }
               />
               <Text>{status}</Text>
@@ -923,11 +955,9 @@ export default function Order() {
           </Banner>
         </Layout.Section>
       )}
-
       {active && (
         <ToastManager toasts={toasts} onDismiss={() => setActive(false)} />
       )}
-
       <Modal
         large
         open={pickActive}
@@ -936,7 +966,6 @@ export default function Order() {
       >
         <Pickpack orders={sortPickOrder(pickOrders)} type="pick" />
       </Modal>
-
       <Modal
         large
         open={packActive}
@@ -945,7 +974,6 @@ export default function Order() {
       >
         <Pickpack orders={sortPackOrder(packOrders)} type="pack" />
       </Modal>
-
       <Layout>
         <Layout.Section>
           <Card>
