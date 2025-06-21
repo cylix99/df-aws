@@ -317,23 +317,6 @@ app.post("/api/call/graphql", async (req, res) => {
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
-// Add exit iframe route for embedded app authentication
-app.get("/exitiframe", (_req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <script>
-        window.top.location.href = window.location.href.replace("/exitiframe", "/api/auth");
-      </script>
-    </head>
-    <body>
-      <p>Redirecting...</p>
-    </body>
-    </html>
-  `);
-});
-
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
   res
     .status(200)

@@ -58,7 +58,6 @@ const shopify = shopifyApp({
   },
   sessionStorage,
   useOnlineTokens: true, // Use online tokens for embedded apps
-  exitIframePath: "/exitiframe",
 });
 
 export default shopify;
