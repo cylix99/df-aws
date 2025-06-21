@@ -69,10 +69,12 @@ app.use("/api/*", (req, res, next) => {
 
 // All endpoints after this point will require an active session (except webhooks)
 app.use("/api/*", (req, res, next) => {
-  // Skip webhook endpoints
-  if (req.path.includes('/webhooks')) {
+  // Skip webhook endpoints and auth endpoints
+  if (req.path.includes('/webhooks') || req.path.includes('/auth')) {
     return next();
   }
+  
+  console.log('[SESSION] Using shopify validateAuthenticatedSession middleware');
   
   // Use the shopify session validation middleware
   return shopify.validateAuthenticatedSession()(req, res, next);
