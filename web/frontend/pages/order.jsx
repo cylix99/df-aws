@@ -227,38 +227,42 @@ export default function Order() {
         console.log("checkbulkrequest", data);
         setStatus(`Status: ${data?.currentBulkOperation?.status}`);
         setCurrentId(data.currentBulkOperation.id);
-        
+
         // If bulk operation is still running (CREATED or RUNNING), keep polling
         if (
           data?.currentBulkOperation?.status === "CREATED" ||
           data?.currentBulkOperation?.status === "RUNNING"
         ) {
-          console.log("Bulk operation still running, will check again in 1 second");
+          console.log(
+            "Bulk operation still running, will check again in 1 second"
+          );
           setTimeout(checkbulkrequest, 1000);
           return;
         }
-        
+
         if (
           data?.currentBulkOperation?.objectCount === "0" &&
           data?.currentBulkOperation?.status === "COMPLETED"
         ) {
           // error with request try again
           console.error(" error with request try again");
-          createbulkrequest();
-        } else if (
+          createbulkrequest();        } else if (
           data?.currentBulkOperation?.url !== null &&
           data?.currentBulkOperation?.status === "COMPLETED"
         ) {
+          console.log("✅ Bulk operation completed! Downloading results from:", data?.currentBulkOperation?.url);
           axios({
             method: "GET",
             url: data?.currentBulkOperation?.url,
             //`https://guq6e1oc76.execute-api.eu-west-2.amazonaws.com/?url=${encodeURIComponent(data?.currentBulkOperation?.url)}`,
           })
             .then(async (response) => {
+              console.log("📦 Raw bulk operation response:", response);
               if (response) {
                 let responseOrders = response.data.split("\n").reverse();
+                console.log("📋 Split orders data:", responseOrders.length, "lines");
                 let groupedOrders = readJsonl(responseOrders);
-                console.log({ groupedOrders });
+                console.log("🔄 Processed orders:", { groupedOrders });
                 setOrders(groupedOrders);
                 let arr = groupedOrders.map((order) => {
                   let mainId = order.id.replace("gid://shopify/Order/", "");
@@ -274,22 +278,23 @@ export default function Order() {
                     rmShipment: order.royalMailShipmentNumber?.value,
                     splitShipping: splitShippingAttr?.value === "true",
                     message: null,
-                    tags: order.tags,
-                  };
+                    tags: order.tags,                  };
                 });
+                console.log("📊 Setting rows with data:", arr);
                 setRows(arr);
               } else {
-                console.error(response);
+                console.error("❌ No response data:", response);
               }
-            })
-            .catch((error) => {
-              console.warn("error : " + error.message);
+            })            .catch((error) => {
+              console.error("❌ Error downloading bulk operation results:", error.message);
             });
         } else {
+          console.log("⏳ Bulk operation not ready yet. Status:", data?.currentBulkOperation?.status, "URL:", data?.currentBulkOperation?.url, "Rerun count:", rerun);
           if (rerun < 5) {
             setRerun(rerun + 1);
             setTimeout(checkbulkrequest, 500);
           } else {
+            console.log("❌ Max retries reached. Setting empty rows.");
             setStatus("No orders found");
             setRows([]);
           }
