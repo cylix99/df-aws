@@ -3,9 +3,7 @@ import { shopifyApp } from "@shopify/shopify-app-express";
 import { PostgreSQLSessionStorage } from "@shopify/shopify-app-session-storage-postgresql";
 import { restResources } from "@shopify/shopify-api/rest/admin/2023-04";
 
-const sessionStorage = new PostgreSQLSessionStorage(
-  process.env.DATABASE_URL
-);
+const sessionStorage = new PostgreSQLSessionStorage(process.env.DATABASE_URL);
 
 const shopify = shopifyApp({
   api: {

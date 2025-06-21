@@ -21,7 +21,7 @@ const STATIC_PATH =
 const app = express();
 
 // Configure session cookies for embedded apps
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 // Configure express for cookie handling
 app.use(express.json());
