@@ -7,7 +7,7 @@ import { restResources } from "@shopify/shopify-api/rest/admin/2023-04";
 // Use Postgres if DATABASE_URL is provided, else fall back to SQLite
 const sessionStorage = process.env.DATABASE_URL
   ? new PostgreSQLSessionStorage(process.env.DATABASE_URL)
-  : new SQLiteSessionStorage({ database: "./sessions.sqlite" });
+  : new SQLiteSessionStorage("./sessions.db");
 
 // Ensure SCOPES are handled correctly
 const scopes = process.env.SCOPES ? process.env.SCOPES.split(",") : [];

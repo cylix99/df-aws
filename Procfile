@@ -1,1 +1,1 @@
-web: npm start --prefix web
+web: npm start
