@@ -74,10 +74,9 @@ export default function Order() {
     if (active) {
       clearAllToasts();
     }
-  }, [clearAllToasts]);
-  useEffect(() => {
-    // First check if there's already a running bulk operation
-    checkbulkrequest();
+  }, [clearAllToasts]);  useEffect(() => {
+    // Always create a fresh bulk operation on page load
+    createbulkrequest();
   }, []);
 
   const BULK_ORDERS = `
@@ -179,10 +178,11 @@ export default function Order() {
     setActive(true);
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  const createbulkrequest = async () => {
+  const [isLoading, setIsLoading] = useState(false);  const createbulkrequest = async () => {
     console.log("🚀 createbulkrequest called");
     setIsLoading(true);
+    setProcessingBulk(false); // Reset processing state when creating new request
+    setStatus("Creating bulk operation...");
     try {
       fetch("/api/call/graphql", {
         method: "POST",
@@ -192,19 +192,23 @@ export default function Order() {
         }),
         headers: { "Content-Type": "application/json" },
       })
-        .then((response) => response.json())
-        .then((data_call) => {
+        .then((response) => response.json())        .then((data_call) => {
+          console.log("Bulk operation creation response:", data_call);
           setStatus(
             data_call?.bulkOperationRunQuery?.bulkOperation?.status
               ? data_call?.bulkOperationRunQuery?.bulkOperation?.status
               : data_call?.bulkOperationRunQuery?.userErrors[0]?.message
-          );          if (
+          );
+          
+          if (
             data_call?.bulkOperationRunQuery?.bulkOperation?.status ===
             "CREATED"
           ) {
-            console.log({ BULK_ORDERS });
-            console.log({ data_call });
-            checkbulkrequest();
+            console.log("✅ Bulk operation created successfully, starting polling");
+            // Start polling immediately after creation
+            setTimeout(checkbulkrequest, 1000);
+          } else {
+            console.error("Failed to create bulk operation:", data_call?.bulkOperationRunQuery?.userErrors);
           }
         })
         .catch((error) => {
@@ -217,7 +221,7 @@ export default function Order() {
       setIsLoading(false);
     }
   };  const checkbulkrequest = async () => {
-    console.log("🔍 checkbulkrequest called. processingBulk:", processingBulk);
+    console.log("🔍 checkbulkrequest called for polling. processingBulk:", processingBulk);
     
     if (processingBulk) {
       console.log("⏸️ Already processing bulk operation, skipping...");
@@ -232,16 +236,15 @@ export default function Order() {
       headers: { "Content-Type": "application/json" },
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("checkbulkrequest", data);
+      .then((data) => {        console.log("checkbulkrequest polling result:", data);
 
-        // If there's no current bulk operation, start a new one
+        // If there's no current bulk operation, something went wrong
         if (
           !data?.currentBulkOperation ||
           data?.currentBulkOperation === null
         ) {
-          console.log("No current bulk operation found, creating new one");
-          createbulkrequest();
+          console.log("No current bulk operation found during polling - this shouldn't happen");
+          setStatus("No bulk operation found");
           return;
         }
 
@@ -257,14 +260,18 @@ export default function Order() {
             "Bulk operation still running, will check again in 1 second"
           );
           setTimeout(checkbulkrequest, 1000);
-          return;
-        }if (
+          return;        }
+
+        if (
           data?.currentBulkOperation?.objectCount === "0" &&
           data?.currentBulkOperation?.status === "COMPLETED"
         ) {
-          // error with request try again
-          console.error(" error with request try again");
-          createbulkrequest();        } else if (
+          // No orders found - show empty state
+          console.log("Bulk operation completed but found 0 orders");
+          setStatus("No orders found");
+          setRows([]);
+          return;
+        } else if (
           data?.currentBulkOperation?.url !== null &&
           data?.currentBulkOperation?.status === "COMPLETED"
         ) {
@@ -842,9 +849,8 @@ export default function Order() {
   const pageMarkup = rows ? (
     <Page
       fullWidth
-      title="Orders Management"
-      primaryAction={
-        <Button icon={RefreshIcon} onClick={() => checkbulkrequest()}>
+      title="Orders Management"      primaryAction={
+        <Button icon={RefreshIcon} onClick={() => createbulkrequest()}>
           Refresh Orders
         </Button>
       }
@@ -930,10 +936,9 @@ export default function Order() {
               </IndexTable>
             ) : (
               <EmptyState
-                heading="No orders found"
-                action={{
+                heading="No orders found"                action={{
                   content: "Refresh Orders",
-                  onAction: () => checkbulkrequest(),
+                  onAction: () => createbulkrequest(),
                 }}
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
               >
