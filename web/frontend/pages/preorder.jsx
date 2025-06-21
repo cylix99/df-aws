@@ -45,14 +45,16 @@ export default function Order() {
   const fetch = useAuthenticatedFetch();
   const { toasts, addToast, addToasts, flushToasts, clearAllToasts } =
     useToastManager();
-
   const [orders, setOrders] = useState(null);
   const [rows, setRows] = useState(null);
-  const [status, setStatus] = useState("Not Submitted");
+  const [status, setStatus] = useState("Initializing...");
   const [rerun, setRerun] = useState(0);
   const [active, setActive] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [totalValue, setTotalValue] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pollingTimeout, setPollingTimeout] = useState(null);
 
   const [pickActive, setPickActive] = useState(false);
   const [pickOrders, setPickOrders] = useState(null);
@@ -73,9 +75,19 @@ export default function Order() {
       clearAllToasts();
     }
   }, [clearAllToasts]);
-
   useEffect(() => {
+    console.log("Preorder page: Starting fresh bulk operation");
+    setIsLoading(true);
+    setError(null);
+    setStatus("Creating bulk operation...");
     createbulkrequest();
+    
+    // Cleanup polling on unmount
+    return () => {
+      if (pollingTimeout) {
+        clearTimeout(pollingTimeout);
+      }
+    };
   }, []);
 
   const BULK_ORDERS = `
@@ -116,35 +128,70 @@ export default function Order() {
       headers: { "Content-Type": "application/json" },
     });
   };
-
   const createbulkrequest = async () => {
-    fetch("/api/call/graphql", {
-      method: "POST",
-      body: JSON.stringify({
-        query: BULK_ORDERS,
-        variables: bulkOrdersText(),
-      }),
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data_call) => {
-        setStatus(
-          data_call?.bulkOperationRunQuery?.bulkOperation?.status
-            ? data_call?.bulkOperationRunQuery?.bulkOperation?.status
-            : data_call?.bulkOperationRunQuery?.userErrors[0]?.message
-        );
-        if (
-          data_call?.bulkOperationRunQuery?.bulkOperation?.status === "CREATED"
-        ) {
-          console.log({ BULK_ORDERS });
-          console.log({ data_call });
-          checkbulkrequest();
-        }
+    try {
+      console.log("Preorder page: Creating new bulk operation");
+      setStatus("Creating bulk operation...");
+      setError(null);
+      
+      const response = await fetch("/api/call/graphql", {
+        method: "POST",
+        body: JSON.stringify({
+          query: BULK_ORDERS,
+          variables: bulkOrdersText(),
+        }),
+        headers: { "Content-Type": "application/json" },
       });
-  };
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data_call = await response.json();
+      console.log("Preorder page: Bulk operation response:", data_call);
+
+      // Handle GraphQL errors
+      if (data_call.errors) {
+        console.error("Preorder page: GraphQL errors:", data_call.errors);
+        setError("Failed to create bulk operation: " + data_call.errors[0].message);
+        setStatus("Error creating bulk operation");
+        setIsLoading(false);
+        return;
+      }
+
+      const bulkOp = data_call?.data?.bulkOperationRunQuery?.bulkOperation;
+      const userErrors = data_call?.data?.bulkOperationRunQuery?.userErrors;
+
+      if (userErrors && userErrors.length > 0) {
+        console.error("Preorder page: User errors:", userErrors);
+        setError("Failed to create bulk operation: " + userErrors[0].message);
+        setStatus("Error: " + userErrors[0].message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (bulkOp?.status === "CREATED") {
+        console.log("Preorder page: Bulk operation created successfully, starting polling");
+        setStatus("Bulk operation created, polling for completion...");
+        setRerun(0); // Reset retry counter
+        checkbulkrequest();
+      } else {
+        console.error("Preorder page: Unexpected bulk operation status:", bulkOp?.status);
+        setError("Failed to create bulk operation");
+        setStatus("Failed to create bulk operation");
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Preorder page: Error creating bulk operation:", error);
+      setError("Network error: " + error.message);
+      setStatus("Network error");
+      setIsLoading(false);
+    }
+  };
   const checkbulkrequest = async () => {
     try {
+      console.log(`Preorder page: Checking bulk operation status (attempt ${rerun + 1})`);
+      
       const response = await fetch("/api/call/graphql", {
         method: "POST",
         body: JSON.stringify({
@@ -153,35 +200,61 @@ export default function Order() {
         headers: { "Content-Type": "application/json" },
       });
 
-      const data = await response.json();
-      console.log("checkbulkrequest", data);
-      setStatus(`Status: ${data?.currentBulkOperation?.status}`);
-      setCurrentId(data.currentBulkOperation.id);
-
-      if (
-        data?.currentBulkOperation?.objectCount === "0" &&
-        data?.currentBulkOperation?.status === "COMPLETED"
-      ) {
-        // error with request try again
-        console.error("error with request try again");
-        createbulkrequest();
-        return; // exit the function if error
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      if (
-        data?.currentBulkOperation?.url !== null &&
-        data?.currentBulkOperation?.status === "COMPLETED"
-      ) {
-        try {
-          const axiosResponse = await axios.get(
-            data?.currentBulkOperation?.url
-          );
-          if (axiosResponse) {
-            let responseOrders = axiosResponse.data;
-            let groupedOrders = readJsonl(responseOrders);
-            console.log({ groupedOrders });
-            setOrders(groupedOrders);
+      const result = await response.json();
+      console.log("Preorder page: Bulk operation check response:", result);
 
+      // Handle GraphQL errors
+      if (result.errors) {
+        console.error("Preorder page: GraphQL errors in check:", result.errors);
+        setError("Error checking bulk operation: " + result.errors[0].message);
+        setStatus("Error checking status");
+        setIsLoading(false);
+        return;
+      }
+
+      const data = result.data?.currentBulkOperation;
+      
+      if (!data) {
+        console.error("Preorder page: No bulk operation data in response");
+        setError("No bulk operation found");
+        setStatus("No bulk operation found");
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Preorder page: Current bulk operation:", data);
+      setStatus(`Status: ${data.status}`);
+      setCurrentId(data.id);
+
+      // Handle completed operation with no results (error case)
+      if (data.objectCount === "0" && data.status === "COMPLETED") {
+        console.error("Preorder page: Bulk operation completed but returned 0 objects, retrying...");
+        setStatus("No results found, creating new bulk operation...");
+        setRerun(0); // Reset counter
+        createbulkrequest();
+        return;
+      }
+
+      // Handle successful completion
+      if (data.url !== null && data.status === "COMPLETED") {
+        console.log("Preorder page: Bulk operation completed successfully, fetching data from:", data.url);
+        setStatus("Bulk operation completed, fetching data...");
+        
+        try {
+          const axiosResponse = await axios.get(data.url);        if (axiosResponse && axiosResponse.data) {
+          console.log("Preorder page: Successfully fetched bulk operation data");
+          setStatus("📋 Parsing preorder data...");
+          let responseOrders = axiosResponse.data;
+          let groupedOrders = readJsonl(responseOrders);
+          console.log("Preorder page: Grouped orders:", groupedOrders);
+          setOrders(groupedOrders);
+
+          if (groupedOrders && groupedOrders.length > 0) {
+            setStatus(`🔄 Processing ${groupedOrders.length} preorders...`);
             let totalValueRunning = 0;
             let arr = groupedOrders.map((order) => {
               let mainId = order.id.replace("gid://shopify/Order/", "");
@@ -196,7 +269,7 @@ export default function Order() {
                 cmc: order.shippingAddress?.country,
                 rmTracking: order.royalMailTrackingNumber?.value,
                 rmShipment: order.royalMailShipmentNumber?.value,
-                fulfilmentStatus: order.FulfillmentOrder[0].status,
+                fulfilmentStatus: order.FulfillmentOrder?.[0]?.status || order.fulfillment?.edges?.[0]?.node?.status,
                 items: convertLineItems(order),
                 message: null,
                 tags: order.tags,
@@ -205,21 +278,101 @@ export default function Order() {
 
             setTotalValue(totalValueRunning);
             setRows(arr);
+            setStatus(`✅ Successfully loaded ${groupedOrders.length} preorders (Total value: £${totalValueRunning.toFixed(2)})`);
+            console.log(`Preorder page: Successfully processed ${groupedOrders.length} preorders`);
           } else {
-            console.error("No response data found");
+            setStatus("No preorders found");
+            setRows([]);
+            console.log("Preorder page: No preorders found in results");
+          }
+          setIsLoading(false);
+          } else {
+            console.error("Preorder page: No response data found from bulk operation URL");
+            setError("No data received from bulk operation");
+            setStatus("No data received");
+            setIsLoading(false);
           }
         } catch (error) {
-          console.warn("error : " + error.message);
-        }
-      } else {
-        if (rerun < 5) {
+          console.error("Preorder page: Error fetching bulk operation data:", error);
+          setError("Failed to fetch bulk operation data: " + error.message);
+          setStatus("Error fetching data");
+          setIsLoading(false);
+        }      } else if (data.status === "RUNNING" || data.status === "CREATED") {
+        // Continue polling
+        const pollingMessage = data.status === "CREATED" 
+          ? "📝 Bulk operation created, waiting for processing to start..." 
+          : `🔄 Processing preorders... (${data.objectCount || 'checking'} found so far)`;
+        console.log(`Preorder page: Bulk operation still ${data.status}, continuing to poll...`);
+        setStatus(pollingMessage);
+        setRerun(rerun + 1);
+        
+        const timeout = setTimeout(() => {
+          checkbulkrequest();
+        }, 1000); // Poll every second
+        
+        setPollingTimeout(timeout);
+      } else if (data.status === "FAILED" || data.status === "CANCELED") {
+        console.error("Preorder page: Bulk operation failed or was canceled:", data.status);
+        setError(`Bulk operation ${data.status.toLowerCase()}`);
+        setStatus(`Bulk operation ${data.status.toLowerCase()}`);
+        setIsLoading(false);      } else {
+        // Unknown status, continue polling for a while then give up
+        if (rerun < 30) { // Increased retry limit
+          console.log(`Preorder page: Unknown status ${data.status}, retrying...`);
+          setStatus(`⏳ Waiting for bulk operation... (attempt ${rerun + 1}/30, status: ${data.status})`);
           setRerun(rerun + 1);
-          setTimeout(checkbulkrequest, 500);
+          
+          const timeout = setTimeout(() => {
+            checkbulkrequest();
+          }, 1000);
+          
+          setPollingTimeout(timeout);        } else {
+          console.error("Preorder page: Too many retries, giving up");
+          setError("Bulk operation timed out");
+          setStatus("❌ Operation timed out after 30 attempts");
+          setIsLoading(false);
         }
       }
     } catch (error) {
-      console.error("Fetch error: " + error.message);
+      console.error("Preorder page: Error checking bulk operation:", error);
+        // Retry on network errors, but not indefinitely
+      if (rerun < 10) {
+        console.log("Preorder page: Retrying after network error...");
+        setStatus(`⚠️ Network error, retrying... (attempt ${rerun + 1}/10)`);
+        setRerun(rerun + 1);
+        
+        const timeout = setTimeout(() => {
+          checkbulkrequest();
+        }, 2000); // Wait longer after errors
+        
+        setPollingTimeout(timeout);      } else {
+        setError("Network error: " + error.message);
+        setStatus(`❌ Network error after 10 attempts: ${error.message}`);
+        setIsLoading(false);
+      }
     }
+  };
+
+  const refreshOrders = () => {
+    console.log("Preorder page: Manual refresh triggered");
+    
+    // Clear any existing polling timeout
+    if (pollingTimeout) {
+      clearTimeout(pollingTimeout);
+      setPollingTimeout(null);
+    }
+    
+    // Reset state
+    setIsLoading(true);
+    setError(null);
+    setRerun(0);
+    setOrders(null);
+    setRows(null);
+    setTotalValue(0);
+    setStatus("Creating fresh bulk operation...");
+    
+    // Start fresh bulk operation
+    createbulkrequest();
   };
 
   console.log({ rows });
@@ -672,9 +825,7 @@ Puzzle Galore
                         value={filterValue}
                       />
                     </Box>
-                  </InlineStack>
-
-                  {status && (
+                  </InlineStack>                  {status && (
                     <Box
                       padding="4"
                       background="bg-surface-secondary"
@@ -684,21 +835,30 @@ Puzzle Galore
                       <BlockStack gap="3">
                         <Text variant="headingSm">Bulk Operation Status</Text>
                         <ProgressBar
-                          progress={status.includes("COMPLETED") ? 100 : 50}
+                          progress={
+                            status.includes("✅") ? 100 :
+                            status.includes("📋") || status.includes("🔄") ? 80 :
+                            status.includes("Processing") || status.includes("RUNNING") ? 60 :
+                            status.includes("created") || status.includes("📝") ? 40 :
+                            status.includes("Creating") ? 20 :
+                            status.includes("❌") || status.includes("Error") ? 0 :
+                            30
+                          }
                           size="small"
                           tone={
-                            status.includes("COMPLETED") ? "success" : "primary"
+                            status.includes("✅") ? "success" :
+                            status.includes("❌") || status.includes("Error") ? "critical" :
+                            status.includes("⚠️") ? "attention" :
+                            "primary"
                           }
                         />
                         <Text>{status}</Text>
                       </BlockStack>
                     </Box>
-                  )}
-
-                  <ButtonGroup>
+                  )}<ButtonGroup>
                     <Button
-                      onClick={() => checkbulkrequest()}
-                      loading={isProcessing}
+                      onClick={refreshOrders}
+                      loading={isLoading}
                       primary
                     >
                       Refresh Orders
@@ -707,18 +867,40 @@ Puzzle Galore
                       onClick={() =>
                         cancelBulkRequest({ variables: { id: currentId } })
                       }
-                      disabled={isProcessing}
+                      disabled={isLoading}
                     >
                       Cancel Request
                     </Button>
                   </ButtonGroup>
                 </BlockStack>
               </Box>
-            </Card>
-
-            <Box paddingBlockStart="6">
+            </Card>            <Box paddingBlockStart="6">
               <Card>
-                {filteredOrders.length > 0 ? (
+                {error && (
+                  <Box paddingBlockEnd="4">
+                    <Banner status="critical" title="Error">
+                      <p>{error}</p>
+                      <Box paddingBlockStart="2">
+                        <Button onClick={refreshOrders} size="slim">
+                          Try Again
+                        </Button>
+                      </Box>
+                    </Banner>
+                  </Box>
+                )}
+                
+                {isLoading && !error && (
+                  <Box padding="4">
+                    <BlockStack gap="4">
+                      <ProgressBar progress={rerun * 5} size="small" />
+                      <Text variant="bodyMd" alignment="center">
+                        {status}
+                      </Text>
+                    </BlockStack>
+                  </Box>
+                )}
+                
+                {!isLoading && !error && filteredOrders && filteredOrders.length > 0 ? (
                   <IndexTable
                     resourceName={resourceName}
                     itemCount={filteredOrders.length}
@@ -737,16 +919,19 @@ Puzzle Galore
                       { title: "Items", width: "20%" },
                     ]}
                   >
-                    {rowMarkup}
-                  </IndexTable>
-                ) : (
+                    {rowMarkup}                  </IndexTable>
+                ) : !isLoading && !error ? (
                   <EmptyState
-                    heading="No orders found"
+                    heading="No preorders found"
+                    action={{
+                      content: "Refresh Orders",
+                      onAction: refreshOrders,
+                    }}
                     image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                   >
-                    <p>No pre-orders match the current filter.</p>
+                    <p>No pre-orders match the current filter. Try refreshing or check your filter settings.</p>
                   </EmptyState>
-                )}
+                ) : null}
               </Card>
             </Box>
           </Layout.Section>

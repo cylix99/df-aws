@@ -16,6 +16,9 @@ import {
   EmptyState,
   Text,
   Badge,
+  ProgressBar,
+  BlockStack,
+  Box,
 } from "@shopify/polaris";
 import {
   CheckIcon,
@@ -269,9 +272,7 @@ export default function Order() {
 
         const currentBulkOp = data.data.currentBulkOperation;
         setStatus(`Status: ${currentBulkOp.status}`);
-        setCurrentId(currentBulkOp.id);
-
-        // If bulk operation is still running (CREATED or RUNNING), keep polling
+        setCurrentId(currentBulkOp.id);        // If bulk operation is still running (CREATED or RUNNING), keep polling
         if (
           currentBulkOp.status === "CREATED" ||
           currentBulkOp.status === "RUNNING"
@@ -279,6 +280,10 @@ export default function Order() {
           console.log(
             "Bulk operation still running, will check again in 1 second"
           );
+          const pollingMessage = currentBulkOp.status === "CREATED" 
+            ? "Bulk operation created, waiting for processing to start..." 
+            : `Processing orders... (${currentBulkOp.objectCount || 'checking'} found so far)`;
+          setStatus(pollingMessage);
           setTimeout(checkbulkrequest, 1000);
           return;
         }
@@ -295,8 +300,7 @@ export default function Order() {
         } else if (
           currentBulkOp.url !== null &&
           currentBulkOp.status === "COMPLETED"
-        ) {
-          console.log(
+        ) {          console.log(
             "✅ Bulk operation completed! Downloading results from:",
             currentBulkOp.url
           );
@@ -304,6 +308,7 @@ export default function Order() {
             "📊 Object count:",
             currentBulkOp.objectCount
           );
+          setStatus(`✅ Bulk operation completed! Processing ${currentBulkOp.objectCount} orders...`);
 
           // Set processing state to prevent concurrent operations
           console.log("🔒 Setting processingBulk to true");
@@ -314,19 +319,21 @@ export default function Order() {
             url: currentBulkOp.url,
             //`https://guq6e1oc76.execute-api.eu-west-2.amazonaws.com/?url=${encodeURIComponent(data?.currentBulkOperation?.url)}`,
           })
-            .then(async (response) => {
-              console.log("📦 Raw bulk operation response:", response);
-              if (response) {
-                let responseOrders = response.data.split("\n").reverse();
-                console.log(
-                  "📋 Split orders data:",
-                  responseOrders.length,
-                  "lines"
-                );
-                let groupedOrders = readJsonl(responseOrders);
-                console.log("🔄 Processed orders:", { groupedOrders });
-                setOrders(groupedOrders);
-                let arr = groupedOrders.map((order) => {
+            .then(async (response) => {                console.log("📦 Raw bulk operation response:", response);
+                if (response) {
+                  setStatus("📋 Parsing order data...");
+                  let responseOrders = response.data.split("\n").reverse();
+                  console.log(
+                    "📋 Split orders data:",
+                    responseOrders.length,
+                    "lines"
+                  );
+                  setStatus(`🔄 Processing ${responseOrders.length} order records...`);
+                  let groupedOrders = readJsonl(responseOrders);
+                  console.log("🔄 Processed orders:", { groupedOrders });
+                  setOrders(groupedOrders);
+                  setStatus(`📊 Finalizing ${groupedOrders.length} orders...`);
+                  let arr = groupedOrders.map((order) => {
                   let mainId = order.id.replace("gid://shopify/Order/", "");
                   const splitShippingAttr = order.customAttributes.find(
                     (attr) => attr.key === "split_preorder_shipping"
@@ -341,12 +348,12 @@ export default function Order() {
                     splitShipping: splitShippingAttr?.value === "true",
                     message: null,
                     tags: order.tags,
-                  };
-                });
-                console.log("📊 Setting rows with data:", arr);
-                setRows(arr);
-                console.log("🔓 Setting processingBulk to false - success");
-                setProcessingBulk(false); // Reset processing state after successful completion
+                  };                  });
+                  console.log("📊 Setting rows with data:", arr);
+                  setRows(arr);
+                  setStatus(`✅ Successfully loaded ${groupedOrders.length} orders`);
+                  console.log("🔓 Setting processingBulk to false - success");
+                  setProcessingBulk(false); // Reset processing state after successful completion
               } else {
                 console.error("❌ No response data:", response);
                 console.log("🔓 Setting processingBulk to false - no data");
@@ -360,8 +367,7 @@ export default function Order() {
               );
               console.log("🔓 Setting processingBulk to false - error");
               setProcessingBulk(false); // Reset processing state on error
-            });        } else {
-          console.log(
+            });        } else {          console.log(
             "⏳ Bulk operation not ready yet. Status:",
             currentBulkOp.status,
             "URL:",
@@ -369,23 +375,23 @@ export default function Order() {
             "Rerun count:",
             rerun
           );
+          setStatus(`⏳ Waiting for bulk operation... (attempt ${rerun + 1}/5)`);
           if (rerun < 5) {
             setRerun(rerun + 1);
             setTimeout(checkbulkrequest, 500);
           } else {
             console.log("❌ Max retries reached. Setting empty rows.");
-            setStatus("No orders found");
+            setStatus("❌ Operation timed out - no orders found");
             setRows([]);
             console.log("🔓 Setting processingBulk to false - max retries");
             setProcessingBulk(false); // Reset processing state on max retries
           }
         }
       })
-      .catch((error) => {
-        console.error("❌ Error checking bulk request:", error);
+      .catch((error) => {        console.error("❌ Error checking bulk request:", error);
         console.log("🔓 Setting processingBulk to false - fetch error");
         setProcessingBulk(false); // Reset processing state on fetch error
-        setStatus("Error checking bulk operation");
+        setStatus(`❌ Error checking bulk operation: ${error.message}`);
       });
   };
 
@@ -879,14 +885,41 @@ export default function Order() {
           Refresh Orders
         </Button>
       }
-    >
-      {status && status !== "COMPLETED" && (
+    >      {status && !status.startsWith("✅") && (
         <Layout.Section>
           <Banner
-            title="Order Status"
-            status={status === "CREATED" ? "info" : "warning"}
+            title="Order Loading Status"
+            status={
+              status.includes("Error") || status.includes("❌") 
+                ? "critical" 
+                : status.includes("✅") 
+                ? "success" 
+                : status.includes("⏳") || status.includes("Creating") || status.includes("Processing")
+                ? "info" 
+                : "warning"
+            }
           >
-            <p>{status}</p>
+            <BlockStack gap="2">
+              <ProgressBar
+                progress={
+                  status.includes("✅") ? 100 :
+                  status.includes("📋") || status.includes("🔄") || status.includes("Finalizing") ? 80 :
+                  status.includes("Processing") || status.includes("RUNNING") ? 60 :
+                  status.includes("created") || status.includes("polling") ? 40 :
+                  status.includes("Creating") ? 20 :
+                  status.includes("❌") || status.includes("Error") ? 0 :
+                  30
+                }
+                size="small"
+                tone={
+                  status.includes("✅") ? "success" :
+                  status.includes("❌") || status.includes("Error") ? "critical" :
+                  status.includes("⏳") ? "attention" :
+                  "primary"
+                }
+              />
+              <Text>{status}</Text>
+            </BlockStack>
           </Banner>
         </Layout.Section>
       )}
