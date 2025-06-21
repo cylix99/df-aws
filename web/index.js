@@ -23,7 +23,8 @@ const app = express();
 // Configure session cookies for embedded apps
 app.set("trust proxy", 1);
 
-// Configure express for cookie handling
+// Configure express for JSON and URL encoded parsing BEFORE webhook handling
+app.use("/api/webhooks", express.raw({ type: "application/json" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -34,23 +35,48 @@ app.get(
   shopify.auth.callback(),
   shopify.redirectToShopifyOrAppRoot()
 );
+
+// Add webhook handling with better error handling
 app.post(
   shopify.config.webhooks.path,
+  (req, res, next) => {
+    console.log("Webhook received:", {
+      topic: req.headers["x-shopify-topic"],
+      shop: req.headers["x-shopify-shop-domain"],
+      hasBody: !!req.body,
+      bodyLength: req.body ? req.body.length : 0,
+    });
+    next();
+  },
   shopify.processWebhooks({ webhookHandlers: GDPRWebhookHandlers })
 );
 
 // Add some debugging middleware before session validation
 app.use("/api/*", (req, res, next) => {
-  console.log(`API request to ${req.path}, headers:`, {
-    authorization: req.headers.authorization,
-    "x-shopify-topic": req.headers["x-shopify-topic"],
-    "x-shopify-shop-domain": req.headers["x-shopify-shop-domain"],
+  // Skip webhook endpoints
+  if (req.path.includes('/webhooks')) {
+    return next();
+  }
+  
+  console.log(`API request to ${req.path}, session info:`, {
+    hasShopifyLocals: !!res.locals.shopify,
+    sessionId: res.locals.shopify?.session?.id,
+    shop: res.locals.shopify?.session?.shop,
+    authorization: req.headers.authorization ? "Bearer token present" : "No authorization header",
   });
   next();
 });
 
-// All endpoints after this point will require an active session.
-app.use("/api/*", shopify.validateAuthenticatedSession());
+// All endpoints after this point will require an active session (except webhooks)
+app.use("/api/*", (req, res, next) => {
+  // Skip webhook endpoints
+  if (req.path.includes('/webhooks')) {
+    return next();
+  }
+  
+  // Use the shopify session validation middleware
+  return shopify.validateAuthenticatedSession()(req, res, next);
+});
 
 function convertLineItemsEmail(items) {
   let groupedItems = {};
@@ -190,10 +216,14 @@ app.get("/api/products/count", async (_req, res) => {
 
 app.get("/api/shop", async (_req, res) => {
   try {
-    console.log(
-      "Shop endpoint called, session:",
-      res.locals.shopify?.session?.id
-    );
+    console.log("Shop endpoint called, session details:", {
+      hasShopifyLocals: !!res.locals.shopify,
+      sessionId: res.locals.shopify?.session?.id,
+      shop: res.locals.shopify?.session?.shop,
+      isOnline: res.locals.shopify?.session?.isOnline,
+      accessToken: res.locals.shopify?.session?.accessToken ? "present" : "missing",
+    });
+    
     if (!res.locals.shopify?.session) {
       console.log("No session found in res.locals.shopify");
       return res.status(401).json({ error: "No session found" });
@@ -202,6 +232,8 @@ app.get("/api/shop", async (_req, res) => {
     const shopData = await shopify.api.rest.Shop.all({
       session: res.locals.shopify.session,
     });
+    
+    console.log("Shop data retrieved successfully");
     res.status(200).send(shopData);
   } catch (error) {
     console.error("Shop endpoint error:", error);
@@ -284,6 +316,23 @@ app.post("/api/call/graphql", async (req, res) => {
 
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
+
+// Add exit iframe route for embedded app authentication
+app.get("/exitiframe", (_req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <script>
+        window.top.location.href = window.location.href.replace("/exitiframe", "/api/auth");
+      </script>
+    </head>
+    <body>
+      <p>Redirecting...</p>
+    </body>
+    </html>
+  `);
+});
 
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
   res

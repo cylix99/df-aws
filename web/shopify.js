@@ -57,7 +57,8 @@ const shopify = shopifyApp({
     path: "/api/webhooks",
   },
   sessionStorage,
-  useOnlineTokens: false, // Use offline tokens for persistent sessions
+  useOnlineTokens: true, // Use online tokens for embedded apps
+  exitIframePath: "/exitiframe",
 });
 
 export default shopify;
