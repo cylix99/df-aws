@@ -7,7 +7,34 @@ import { restResources } from "@shopify/shopify-api/rest/admin/2023-04";
 const sessionStorage = new MemorySessionStorage();
 
 // Ensure SCOPES are handled correctly
-const scopes = process.env.SCOPES ? process.env.SCOPES.split(",") : [];
+const scopes = process.env.SCOPES
+  ? process.env.SCOPES.split(",")
+  : [
+      "read_customers",
+      "write_customers",
+      "read_inventory",
+      "read_orders",
+      "read_all_orders",
+      "write_orders",
+      "read_products",
+      "write_products",
+      "read_product_listings",
+      "read_reports",
+      "read_shipping",
+      "write_assigned_fulfillment_orders",
+      "read_assigned_fulfillment_orders",
+      "write_fulfillments",
+      "read_fulfillments",
+      "read_merchant_managed_fulfillment_orders",
+      "write_merchant_managed_fulfillment_orders",
+      "read_third_party_fulfillment_orders",
+      "write_third_party_fulfillment_orders",
+      "read_discounts",
+      "write_discounts",
+      "write_store_credit_account_transactions",
+    ];
+
+console.log("Using scopes:", scopes);
 
 const shopify = shopifyApp({
   api: {
