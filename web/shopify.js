@@ -1,9 +1,13 @@
 import { LATEST_API_VERSION } from "@shopify/shopify-api";
 import { shopifyApp } from "@shopify/shopify-app-express";
 import { PostgreSQLSessionStorage } from "@shopify/shopify-app-session-storage-postgresql";
+import { SQLiteSessionStorage } from "@shopify/shopify-app-session-storage-sqlite";
 import { restResources } from "@shopify/shopify-api/rest/admin/2023-04";
 
-const sessionStorage = new PostgreSQLSessionStorage(process.env.DATABASE_URL);
+// Use Postgres if DATABASE_URL is provided, else fall back to SQLite
+const sessionStorage = process.env.DATABASE_URL
+  ? new PostgreSQLSessionStorage(process.env.DATABASE_URL)
+  : new SQLiteSessionStorage({ database: "./sessions.sqlite" });
 
 // Ensure SCOPES are handled correctly
 const scopes = process.env.SCOPES ? process.env.SCOPES.split(",") : [];
