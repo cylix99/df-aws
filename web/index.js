@@ -39,8 +39,16 @@ app.post(
   shopify.processWebhooks({ webhookHandlers: GDPRWebhookHandlers })
 );
 
-// If you are adding routes outside of the /api path, remember to
-// also add a proxy rule for them in web/frontend/vite.config.js
+// Add some debugging middleware before session validation
+app.use("/api/*", (req, res, next) => {
+  console.log(`API request to ${req.path}, headers:`, {
+    authorization: req.headers.authorization,
+    "x-shopify-topic": req.headers["x-shopify-topic"],
+    "x-shopify-shop-domain": req.headers["x-shopify-shop-domain"],
+  });
+  next();
+});
+
 // All endpoints after this point will require an active session.
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
@@ -181,10 +189,24 @@ app.get("/api/products/count", async (_req, res) => {
 });
 
 app.get("/api/shop", async (_req, res) => {
-  const shopData = await shopify.api.rest.Shop.all({
-    session: res.locals.shopify.session,
-  });
-  res.status(200).send(shopData);
+  try {
+    console.log(
+      "Shop endpoint called, session:",
+      res.locals.shopify?.session?.id
+    );
+    if (!res.locals.shopify?.session) {
+      console.log("No session found in res.locals.shopify");
+      return res.status(401).json({ error: "No session found" });
+    }
+
+    const shopData = await shopify.api.rest.Shop.all({
+      session: res.locals.shopify.session,
+    });
+    res.status(200).send(shopData);
+  } catch (error) {
+    console.error("Shop endpoint error:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Endpoint to trigger email sending

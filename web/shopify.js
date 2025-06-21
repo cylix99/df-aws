@@ -41,7 +41,9 @@ const shopify = shopifyApp({
     apiKey: process.env.SHOPIFY_API_KEY,
     apiSecretKey: process.env.SHOPIFY_API_SECRET,
     scopes,
-    hostName: process.env.HOST.replace(/https?:\/\//, ""),
+    hostName: process.env.HOST
+      ? process.env.HOST.replace(/https?:\/\//, "")
+      : "heroku.puzzlesgalore.co.uk",
     apiVersion: LATEST_API_VERSION,
     restResources,
     isEmbeddedApp: true,
@@ -55,6 +57,7 @@ const shopify = shopifyApp({
     path: "/api/webhooks",
   },
   sessionStorage,
+  useOnlineTokens: false, // Use offline tokens for persistent sessions
 });
 
 export default shopify;
