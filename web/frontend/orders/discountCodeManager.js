@@ -115,8 +115,12 @@ async function findValidDiscountCode() {
       }
 
       // Check if data exists
+      if (!result.data) {
+        console.error("No data in response:", result);
+        return null;
+      }
 
-      const { edges = [], pageInfo = {} } = result?.discountNodes;
+      const { edges = [], pageInfo = {} } = result.data.discountNodes || {};
 
       // Update pagination info
       hasNextPage = pageInfo.hasNextPage || false;
@@ -282,8 +286,8 @@ export async function hasReceivedOffer(customerId) {
       return false;
     }
 
-    // The customer data is directly in data.customer
-    const customer = data.customer;
+    // The customer data is directly in data.data.customer
+    const customer = data.data?.customer;
 
     // Validate customer data
     if (!customer) {
@@ -403,14 +407,14 @@ export async function createDiscountCode(isAmazonOrder = false) {
       return null;
     }
 
-    if (data?.discountCodeBasicCreate?.userErrors?.length > 0) {
-      const error = data.discountCodeBasicCreate.userErrors[0];
+    if (data?.data?.discountCodeBasicCreate?.userErrors?.length > 0) {
+      const error = data.data.discountCodeBasicCreate.userErrors[0];
       console.error("Failed to create discount code:", error);
       throw new Error(error.message);
     }
 
     const createdCode =
-      data?.discountCodeBasicCreate?.codeDiscountNode?.codeDiscount?.codes
+      data?.data?.discountCodeBasicCreate?.codeDiscountNode?.codeDiscount?.codes
         ?.edges[0]?.node?.code;
 
     if (!createdCode) {
@@ -485,8 +489,8 @@ export async function recordOfferSent(customerId, isAmazonOrder = false) {
     }
 
     // Check for user errors
-    if (data?.metafieldsSet?.userErrors?.length > 0) {
-      const errors = data.metafieldsSet.userErrors;
+    if (data?.data?.metafieldsSet?.userErrors?.length > 0) {
+      const errors = data.data.metafieldsSet.userErrors;
       console.error("Metafield update validation errors:", {
         errors,
         customerId,
@@ -495,7 +499,7 @@ export async function recordOfferSent(customerId, isAmazonOrder = false) {
     }
 
     // Validate successful update
-    const createdMetafield = data?.metafieldsSet?.metafields?.[0];
+    const createdMetafield = data?.data?.metafieldsSet?.metafields?.[0];
     if (
       !createdMetafield?.id ||
       createdMetafield.value !== variables.metafield.value

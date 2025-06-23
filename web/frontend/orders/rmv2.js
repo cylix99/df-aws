@@ -7,6 +7,7 @@ import {
   hasReceivedOffer,
   createDiscountCode,
   recordOfferSent,
+  setAuthFetch,
 } from "./discountCodeManager.js";
 
 const clientId = "7179C24746DE67CE3498458CD6CE3B5E";
@@ -215,6 +216,9 @@ const createManifestTitle = async () => {
 export async function getLabelsv2(orders, authFetch) {
   let returnDataArray = { toast: [], data: [], originalData: null };
   let pdfsToMerge = [];
+
+  // Initialize the discount code manager with the authenticated fetch function
+  setAuthFetch(authFetch);
 
   // Pre-generate discount code once for this batch
   let batchDiscountCode = null;
