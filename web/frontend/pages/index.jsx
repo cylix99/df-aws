@@ -352,7 +352,7 @@ export default function HomePage() {
     if (data != null) {
       console.log(data);
       const updatedRows = [...rd];
-      data.productVariants.edges.map((product) => {
+      data.productVariants?.edges?.map((product) => {
         if (!product.node.displayName.toLowerCase().includes("damaged")) {
           setCursor(product.cursor);
           const rowIndex = updatedRows.findIndex(
