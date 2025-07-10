@@ -340,59 +340,122 @@ export default function HomePage() {
 
   console.log({ rows });
 
-  const getproducts = async (barcodesGql, rd, allFoundBarcodes = new Set(), isFirstCall = true) => {
-    if (isFirstCall) {
-      setIsCheckingProducts(true);
-    }
+  const getproducts = async (barcodesGql, initialRows) => {
+    setIsCheckingProducts(true);
     
-    const response = await fetch("/api/call/graphql", {
-      method: "POST",
-      body: JSON.stringify({
-        query: getProductsQuery(barcodesGql),
-        variables: null,
-      }),
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await response.json();
-    if (data != null) {
-      console.log(data);
-      const updatedRows = [...rd];
-      
-      data.productVariants?.edges?.forEach((product) => {
-        if (!product.node.displayName.toLowerCase().includes("damaged")) {
-          setCursor(product.cursor);
-          const rowIndex = updatedRows.findIndex(
-            (row) => row[1] === product.node.barcode
-          );
-          console.log({ rowIndex });
-          if (rowIndex !== -1) {
-            updatedRows[rowIndex][4] = product.node.displayName;
-            updatedRows[rowIndex][2] = product.node.sku;
-            updatedRows[rowIndex][3] = product.node.inventoryQuantity;
-            updatedRows[rowIndex][5] = "Found";
-            allFoundBarcodes.add(product.node.barcode);
-          }
+    let allFoundBarcodes = new Set();
+    let currentRows = [...initialRows];
+    let hasNextPage = true;
+    let currentCursor = null;
+    
+    try {
+      while (hasNextPage) {
+        // Build query with current cursor
+        let productsQuery = [`first: 250`, `query: "${barcodesGql}"`];
+        if (currentCursor != null) {
+          productsQuery.push(`after:"${currentCursor}"`);
         }
-      });
-
-      console.log({ updatedRows });
-      
-      if (data.productVariants?.pageInfo?.hasNextPage) {
-        // Continue to next page without updating rows yet
-        await getproducts(barcodesGql, updatedRows, allFoundBarcodes, false);
-      } else {
-        setCursor(null);
-        // After all pages are processed, ensure unfound items are marked as "Not On System"
-        const finalRows = updatedRows.map(row => {
-          if (!allFoundBarcodes.has(row[1]) && row[5] !== "Found") {
-            row[5] = "Not On System";
+        productsQuery = productsQuery.join(",");
+        
+        const query = `
+          query {
+            productVariants(${productsQuery}) {
+              pageInfo {
+                hasNextPage
+                hasPreviousPage
+              }
+              edges {
+                cursor
+                node {
+                  id
+                  product {
+                    id
+                  }  
+                  displayName 
+                  barcode
+                  sku
+                  inventoryQuantity           
+                }
+              }
+            }
           }
-          return row;
+        `;
+        
+        const response = await fetch("/api/call/graphql", {
+          method: "POST",
+          body: JSON.stringify({
+            query: query,
+            variables: null,
+          }),
+          headers: { "Content-Type": "application/json" },
         });
-        console.log('Final rows:', finalRows);
-        setRows(finalRows);
-        setIsCheckingProducts(false);
+        
+        const data = await response.json();
+        console.log('Page data:', data);
+        
+        console.log('Data structure check:', {
+          hasData: !!data,
+          hasDataProperty: !!data?.data,
+          hasProductVariants: !!data?.data?.productVariants,
+          hasEdges: !!data?.data?.productVariants?.edges,
+          edgesLength: data?.data?.productVariants?.edges?.length
+        });
+        
+        if (data?.data?.productVariants?.edges) {
+          console.log('Processing', data.data.productVariants.edges.length, 'product variants');
+          data.data.productVariants.edges.forEach((product, index) => {
+            console.log(`Processing product ${index}:`, product.node.barcode, product.node.displayName);
+            if (!product.node.displayName.toLowerCase().includes("damaged")) {
+              const productBarcode = product.node.barcode;
+              console.log('Checking product barcode:', productBarcode);
+              console.log('Current rows barcodes:', currentRows.map(r => r[1]));
+              
+              const rowIndex = currentRows.findIndex(
+                (row) => row[1] === productBarcode
+              );
+              console.log('Row index found:', rowIndex, 'for barcode:', productBarcode);
+              
+              if (rowIndex !== -1) {
+                currentRows[rowIndex][4] = product.node.displayName;
+                currentRows[rowIndex][2] = product.node.sku;
+                currentRows[rowIndex][3] = product.node.inventoryQuantity;
+                currentRows[rowIndex][5] = "Found";
+                allFoundBarcodes.add(productBarcode);
+                console.log('Updated row:', currentRows[rowIndex]);
+              }
+            }
+          });
+          
+          hasNextPage = data.data.productVariants.pageInfo.hasNextPage;
+          if (hasNextPage) {
+            currentCursor = data.data.productVariants.edges[data.data.productVariants.edges.length - 1].cursor;
+          }
+        } else {
+          console.log('No edges found in data structure');
+          hasNextPage = false;
+        }
       }
+      
+      // After all pages are processed, ensure unfound items are marked as "Not On System"
+      console.log('All found barcodes:', Array.from(allFoundBarcodes));
+      console.log('Current rows before final processing:', currentRows);
+      
+      const finalRows = currentRows.map(row => {
+        console.log(`Processing row with barcode ${row[1]}: currently ${row[5]}, found: ${allFoundBarcodes.has(row[1])}`);
+        if (!allFoundBarcodes.has(row[1]) && row[5] !== "Found") {
+          row[5] = "Not On System";
+        }
+        return row;
+      });
+      
+      console.log('Final rows:', finalRows);
+      setRows(finalRows);
+      
+    } catch (error) {
+      console.error('Error in getproducts:', error);
+    } finally {
+      setIsCheckingProducts(false);
+      setCursor(null);
     }
   };
 
