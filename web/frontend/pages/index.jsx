@@ -339,7 +339,7 @@ export default function HomePage() {
 
   console.log({ rows });
 
-  const getproducts = async (barcodesGql, rd) => {
+  const getproducts = async (barcodesGql, rd, allFoundBarcodes = new Set()) => {
     const response = await fetch("/api/call/graphql", {
       method: "POST",
       body: JSON.stringify({
@@ -352,6 +352,7 @@ export default function HomePage() {
     if (data != null) {
       console.log(data);
       const updatedRows = [...rd];
+      
       data.productVariants?.edges?.map((product) => {
         if (!product.node.displayName.toLowerCase().includes("damaged")) {
           setCursor(product.cursor);
@@ -363,16 +364,27 @@ export default function HomePage() {
             updatedRows[rowIndex][4] = product.node.displayName;
             updatedRows[rowIndex][2] = product.node.sku;
             updatedRows[rowIndex][3] = product.node.inventoryQuantity;
+            updatedRows[rowIndex][5] = "Found";
+            allFoundBarcodes.add(product.node.barcode);
           }
         }
       });
 
       console.log({ updatedRows });
       setRows(updatedRows);
+      
       if (data.productVariants?.pageInfo?.hasNextPage) {
-        getproducts(barcodesGql, updatedRows);
+        getproducts(barcodesGql, updatedRows, allFoundBarcodes);
       } else {
         setCursor(null);
+        // After all pages are processed, ensure unfound items are marked as "Not On System"
+        const finalRows = updatedRows.map(row => {
+          if (!allFoundBarcodes.has(row[1]) && row[5] !== "Found") {
+            row[5] = "Not On System";
+          }
+          return row;
+        });
+        setRows(finalRows);
       }
     }
   };
@@ -529,7 +541,22 @@ export default function HomePage() {
                       "Product",
                       "Status",
                     ]}
-                    rows={rows}
+                    rows={rows.map(row => {
+                      const status = row[5];
+                      let statusDisplay = status;
+                      
+                      if (status === "Found") {
+                        statusDisplay = "✅ Found";
+                      } else if (status === "Not On System") {
+                        statusDisplay = "❌ Not On System";
+                      } else if (status === "Updated") {
+                        statusDisplay = "✅ Updated";
+                      } else if (status === "Failed") {
+                        statusDisplay = "❌ Failed";
+                      }
+                      
+                      return [row[0], row[1], row[2], row[3], row[4], statusDisplay];
+                    })}
                     truncate
                   />
                 )}
