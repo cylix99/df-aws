@@ -746,9 +746,13 @@ function buildCreateshipment(order) {
   let TrackingNotifications;
   let PhoneNumber;
   let EmailAddress;
+  
+  // Format phone number - Royal Mail requires it for many services
   if (shipping.phone) {
-    PhoneNumber = shipping.phone?.substring(0, 34);
+    PhoneNumber = shipping.phone?.replace(/\s/g, '').substring(0, 34);
   }
+  
+  // Format email address
   if (order.customer?.email) {
     EmailAddress =
       order.customer?.email?.length < 34 ? order.customer?.email : null;
@@ -782,6 +786,8 @@ function buildCreateshipment(order) {
         County: shipping.provinceCode === "VI" ? "" : shipping.provinceCode,
         CountryCode: oc === "VI" ? "VI" : oc,
         Postcode: shipping.zip?.substring(0, 20),
+        ContactEmail: EmailAddress || null,
+        ContactPhone: PhoneNumber || null,
       },
     },
     ShipmentInformation: {
@@ -823,7 +829,6 @@ function buildCreateshipment(order) {
   };
 
   if (TrackingNotifications) {
-    request.Destination.Address.ContactEmail = EmailAddress;
     request.CarrierSpecifics = {
       ServiceEnhancements: [{ Code: TrackingNotifications }],
     };
