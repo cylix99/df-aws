@@ -65,6 +65,7 @@ export default function HomePage() {
   const [mainMessage, setMainMessage] = useState("Updating products...");
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState("");
+  const [isCheckingProducts, setIsCheckingProducts] = useState(false);
 
   function getProductsQuery(barcodesGql) {
     let productsQuery = [`first: 250`, `query: "${barcodesGql}"`];
@@ -339,7 +340,11 @@ export default function HomePage() {
 
   console.log({ rows });
 
-  const getproducts = async (barcodesGql, rd, allFoundBarcodes = new Set()) => {
+  const getproducts = async (barcodesGql, rd, allFoundBarcodes = new Set(), isFirstCall = true) => {
+    if (isFirstCall) {
+      setIsCheckingProducts(true);
+    }
+    
     const response = await fetch("/api/call/graphql", {
       method: "POST",
       body: JSON.stringify({
@@ -353,7 +358,7 @@ export default function HomePage() {
       console.log(data);
       const updatedRows = [...rd];
       
-      data.productVariants?.edges?.map((product) => {
+      data.productVariants?.edges?.forEach((product) => {
         if (!product.node.displayName.toLowerCase().includes("damaged")) {
           setCursor(product.cursor);
           const rowIndex = updatedRows.findIndex(
@@ -371,10 +376,10 @@ export default function HomePage() {
       });
 
       console.log({ updatedRows });
-      setRows(updatedRows);
       
       if (data.productVariants?.pageInfo?.hasNextPage) {
-        getproducts(barcodesGql, updatedRows, allFoundBarcodes);
+        // Continue to next page without updating rows yet
+        await getproducts(barcodesGql, updatedRows, allFoundBarcodes, false);
       } else {
         setCursor(null);
         // After all pages are processed, ensure unfound items are marked as "Not On System"
@@ -384,7 +389,9 @@ export default function HomePage() {
           }
           return row;
         });
+        console.log('Final rows:', finalRows);
         setRows(finalRows);
+        setIsCheckingProducts(false);
       }
     }
   };
@@ -404,16 +411,19 @@ export default function HomePage() {
   };
 
   const handleChange = useCallback(async (barcode) => {
-    if (barcode != null) {
+    if (barcode != null && barcode.trim() !== "") {
+      setCursor(null); // Reset cursor for new search
       let rd = [];
       for (const bc of barcode.split(/\r?\n/)) {
-        if (bc) rd.push(["", bc, "", "", "", "Not On System"]);
+        if (bc.trim()) rd.push(["", bc.trim(), "", "", "", "Checking..."]);
       }
       setRows(rd);
       setValue(barcode);
-      let tmpbarcodes = barcode.split(/\r?\n/).map((i) => "barcode:" + i);
+      let tmpbarcodes = barcode.split(/\r?\n/)
+        .filter(bc => bc.trim())
+        .map((i) => "barcode:" + i.trim());
       tmpbarcodes = tmpbarcodes.join(" OR ");
-      getproducts(tmpbarcodes, rd);
+      await getproducts(tmpbarcodes, rd);
     }
   }, []);
 
@@ -523,6 +533,11 @@ export default function HomePage() {
                   placeholder="Enter one barcode per line"
                   autoComplete="off"
                 />
+                {isCheckingProducts && (
+                  <Banner status="info">
+                    <Text>🔄 Checking products in Shopify...</Text>
+                  </Banner>
+                )}
                 {rows.length > 0 && (
                   <DataTable
                     columnContentTypes={[
@@ -553,6 +568,8 @@ export default function HomePage() {
                         statusDisplay = "✅ Updated";
                       } else if (status === "Failed") {
                         statusDisplay = "❌ Failed";
+                      } else if (status === "Checking...") {
+                        statusDisplay = "🔄 Checking...";
                       }
                       
                       return [row[0], row[1], row[2], row[3], row[4], statusDisplay];
