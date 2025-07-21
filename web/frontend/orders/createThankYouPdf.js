@@ -182,7 +182,7 @@ export async function createPuzzleGaloreLabel(props = {}) {
   });
 
   // === REFINED VALIDITY INFO ===
-  const validityText = "Valid for 30 days from order date";
+  const validityText = "Valid for 30 days from dispatch date";
   const validitySize = 9;
   const validityWidth = helvetica.widthOfTextAtSize(validityText, validitySize);
   page.drawText(validityText, {
