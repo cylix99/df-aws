@@ -7,6 +7,7 @@ import shopify from "./shopify.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 import axios from "axios";
 import { sendOrderEmails } from "./emailService.js"; // Adjust the import path as needed
+import { calculateUSCustomsDuties, isUSAddress, createDutiesLineItem, getDutiesExplanation } from "./utils/usCustomsDuties.js";
 
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
@@ -367,6 +368,52 @@ app.post("/api/call/graphql", async (req, res) => {
           error: "An error occurred, but still returning 200 status.",
         })
       );
+  }
+});
+
+// API endpoint to calculate US customs duties
+app.post("/api/calculate-duties", async (req, res) => {
+  try {
+    const { items, totalValue, currency, shippingAddress, shipDate } = req.body;
+
+    // Validate required fields
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Items array is required" });
+    }
+
+    if (!totalValue || totalValue <= 0) {
+      return res.status(400).json({ error: "Total value is required and must be greater than 0" });
+    }
+
+    // Check if shipping to US
+    if (!isUSAddress(shippingAddress)) {
+      return res.json({
+        dutyRequired: false,
+        totalDuties: 0,
+        adminFee: 0,
+        totalCharges: 0,
+        reason: "Duties only apply to US shipments"
+      });
+    }
+
+    // Calculate duties
+    const dutiesCalculation = calculateUSCustomsDuties(items, totalValue, currency || 'GBP');
+    
+    // Add explanation for customer
+    dutiesCalculation.customerExplanation = getDutiesExplanation(dutiesCalculation);
+    
+    // Create line item if duties are required
+    if (dutiesCalculation.dutyRequired) {
+      dutiesCalculation.lineItem = createDutiesLineItem(dutiesCalculation);
+    }
+
+    res.json(dutiesCalculation);
+  } catch (error) {
+    console.error("Error calculating duties:", error);
+    res.status(500).json({ 
+      error: "Unable to calculate duties at this time",
+      message: error.message 
+    });
   }
 });
 
