@@ -6,7 +6,8 @@
 
 class CartDutiesCalculator {
   constructor() {
-    this.apiEndpoint = 'https://heroku.puzzlesgalore.co.uk/proxy/calculate-duties';
+    // Use Shopify app proxy URL (will be /app/duties after proxy setup)
+    this.apiEndpoint = '/app/duties';
     this.isUSCart = false;
     this.dutiesData = null;
     
