@@ -4,11 +4,11 @@ import {
   Text,
   Banner,
   Spinner,
-  Stack,
   TextContainer,
   Button,
   InlineStack,
-  Box
+  Box,
+  BlockStack
 } from '@shopify/polaris';
 import { useAuthenticatedFetch } from '../hooks';
 
@@ -126,7 +126,7 @@ export function USDutiesCalculator({
   return (
     <Card>
       <Box padding="4">
-        <Stack>
+        <BlockStack gap="4">
           <Banner tone="info" title="US Customs Duties Required">
             <TextContainer>
               <Text as="p">
@@ -135,12 +135,12 @@ export function USDutiesCalculator({
             </TextContainer>
           </Banner>
 
-          <Stack>
+          <BlockStack gap="2">
             <Text variant="headingMd" as="h3">
               Duties Breakdown
             </Text>
             
-            <Stack gap="2">
+            <BlockStack gap="2">
               <InlineStack align="space-between">
                 <Text>Customs Duty (10%)</Text>
                 <Text variant="bodyMd" fontWeight="semibold">
@@ -165,15 +165,15 @@ export function USDutiesCalculator({
                   </Text>
                 </InlineStack>
               </Box>
-            </Stack>
-          </Stack>
+            </BlockStack>
+          </BlockStack>
 
           {dutiesData.breakdown && dutiesData.breakdown.length > 0 && (
-            <Stack>
+            <BlockStack gap="2">
               <Text variant="headingMd" as="h3">
                 Item Details
               </Text>
-              <Stack gap="1">
+              <BlockStack gap="1">
                 {dutiesData.breakdown.map((item, index) => (
                   <InlineStack key={index} align="space-between">
                     <Text variant="bodyMd">
@@ -184,8 +184,8 @@ export function USDutiesCalculator({
                     </Text>
                   </InlineStack>
                 ))}
-              </Stack>
-            </Stack>
+              </BlockStack>
+            </BlockStack>
           )}
 
           <Banner tone="success" title="No Surprises at Delivery">
@@ -197,15 +197,15 @@ export function USDutiesCalculator({
             </TextContainer>
           </Banner>
 
-          <Stack gap="1">
+          <BlockStack gap="1">
             <Text variant="bodyMd" fontWeight="semibold">
               HTS Code: {dutiesData.htsCode}
             </Text>
             <Text variant="bodySm" color="subdued">
               Jigsaw puzzles are classified as toys under US customs regulations
             </Text>
-          </Stack>
-        </Stack>
+          </BlockStack>
+        </BlockStack>
       </Box>
     </Card>
   );
