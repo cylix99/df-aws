@@ -417,6 +417,55 @@ app.post("/api/calculate-duties", async (req, res) => {
   }
 });
 
+// Public endpoint for cart duties calculation (no authentication required)
+app.post("/proxy/calculate-duties", async (req, res) => {
+  try {
+    const { items, totalValue, currency, shippingAddress } = req.body;
+
+    // Validate required fields
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Items array is required" });
+    }
+
+    if (!totalValue || totalValue <= 0) {
+      return res.status(400).json({ error: "Total value is required and must be greater than 0" });
+    }
+
+    // Check if shipping to US
+    if (!isUSAddress(shippingAddress)) {
+      return res.json({
+        dutyRequired: false,
+        totalDuties: 0,
+        adminFee: 0,
+        totalCharges: 0,
+        reason: "Duties only apply to US shipments"
+      });
+    }
+
+    // Calculate duties
+    const dutiesCalculation = calculateUSCustomsDuties(items, totalValue, currency || 'GBP');
+    
+    // Add explanation for customer
+    dutiesCalculation.customerExplanation = getDutiesExplanation(dutiesCalculation);
+    
+    // Create line item if duties are required
+    if (dutiesCalculation.dutyRequired) {
+      dutiesCalculation.lineItem = createDutiesLineItem(dutiesCalculation);
+    }
+
+    // Set CORS headers for theme access
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.json(dutiesCalculation);
+  } catch (error) {
+    console.error("Error calculating duties:", error);
+    res.status(500).json({ 
+      error: "Unable to calculate duties at this time",
+      message: error.message 
+    });
+  }
+});
+
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 

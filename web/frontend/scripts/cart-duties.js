@@ -6,7 +6,7 @@
 
 class CartDutiesCalculator {
   constructor() {
-    this.apiEndpoint = '/apps/duncans-functions/api/calculate-duties'; // Adjust based on your app's proxy URL
+    this.apiEndpoint = 'https://heroku.puzzlesgalore.co.uk/proxy/calculate-duties';
     this.isUSCart = false;
     this.dutiesData = null;
     
