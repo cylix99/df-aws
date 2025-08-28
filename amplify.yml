@@ -17,6 +17,8 @@ frontend:
         - nvm use 20.10.0
         - cd web
         - npm install --legacy-peer-deps
+        - cd frontend
+        - npm install --legacy-peer-deps
     build:
       commands:
         - npm run build
