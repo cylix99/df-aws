@@ -4,8 +4,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "npx vite@4.3.9 build",
-    "dev": "npx vite@4.3.9",
+    "build": "vite build",
+    "dev": "vite",
     "coverage": "vitest run --coverage",
     "serve": "node ../index.js"
   },

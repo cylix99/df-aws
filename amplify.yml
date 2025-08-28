@@ -1,33 +1,36 @@
 version: 1
-backend:
-  phases:
-    preBuild:
-      commands:
-        - nvm install 20.10.0
-        - nvm use 20.10.0
-        - node --version
-        - npm --version
-    build:
-      commands:
-        - npm install --legacy-peer-deps
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - nvm use 20.10.0
-        - cd web
-        - npm install --legacy-peer-deps
-        - cd frontend
-        - npm install --legacy-peer-deps
-    build:
-      commands:
-        - npm run build
-  artifacts:
-    baseDirectory: dist
-    files:
-      - '**/*'
-    name: amplify-outputs
-  cache:
-    paths:
-      - web/node_modules/**/*
-      - node_modules/**/*
+applications:
+  - appRoot: web/frontend
+    backend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 20.10.0
+            - nvm use 20.10.0
+            - node --version
+            - npm --version
+            - cd ../../
+            - npm install --legacy-peer-deps
+        build:
+          commands:
+            - echo "Backend build completed"
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm use 20.10.0
+            - cd ../../
+            - npm install --legacy-peer-deps
+            - cd web
+            - npm install --legacy-peer-deps
+        build:
+          commands:
+            - npm run build --prefix frontend
+      artifacts:
+        baseDirectory: dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - ../../node_modules/**/*
+          - ../node_modules/**/*

@@ -11,7 +11,12 @@
       "Bash(cp:*)",
       "Bash(npm install:*)",
       "Bash(amplify:*)",
-      "Bash(npm create:*)"
+      "Bash(npm create:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm cache clean:*)",
+      "WebFetch(domain:stackoverflow.com)"
     ],
     "deny": [],
     "ask": [],
