@@ -1156,19 +1156,7 @@ const bulkOrdersText = () => {
                             id
                           } 
                           totalInventory
-                          variant {
-                          inventoryItem {
-                            inventoryLevels(first: 10) {
-                              edges {
-                                node {
-                                  quantities(names: ["on_hand"]) {
-                                    name
-                                    quantity
-                                  }
-                                }
-                              }
-                            }
-                          }
+                         
                           title
                         }
                         
@@ -1182,6 +1170,16 @@ const bulkOrdersText = () => {
                           inventoryItem {
                             harmonizedSystemCode
                             countryCodeOfOrigin
+                            inventoryLevels(first: 10) {
+                              edges {
+                                node {
+                                  quantities(names: ["on_hand"]) {
+                                    name
+                                    quantity
+                                  }
+                                }
+                              }
+  }
                           }
                         }
                         quantity

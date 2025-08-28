@@ -1099,7 +1099,13 @@ const bulkOrdersText = () => {
                             value
                           }
                           totalInventory
-                          variant {
+                         
+                          title
+                        }
+                        
+                        variant {
+                          weight
+                          
                           inventoryItem {
                             inventoryLevels(first: 10) {
                               edges {
@@ -1111,14 +1117,6 @@ const bulkOrdersText = () => {
                                 }
                               }
                             }
-                          }
-                          title
-                        }
-                        
-                        variant {
-                          weight
-                          
-                          inventoryItem {
                             unitCost {
                              amount
                             }
