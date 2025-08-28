@@ -274,7 +274,7 @@ export default function Pickpack({ type, orders: initialOrders }) {
                                 </p>
                                 <p style={styles.lowerPad}>
                                   <Text as="span" color="subdued">
-                                    In Stock: {item.product?.totalInventory}
+                                    In Stock: {item.variant?.inventoryItem?.inventoryLevels?.edges?.[0]?.node?.quantities?.find(q => q.name === "on_hand")?.quantity || 0}
                                   </Text>
                                 </p>
                               </div>
@@ -352,7 +352,7 @@ export default function Pickpack({ type, orders: initialOrders }) {
                       </p>
                       <p style={styles.lowerPad}>
                         <Text as="span" color="subdued">
-                          In Stock {order.totalInventory}
+                          In Stock {order.onHandInventory}
                         </Text>
                       </p>
                     </div>

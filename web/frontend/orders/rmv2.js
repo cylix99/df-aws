@@ -654,7 +654,7 @@ function buildCreateshipment(order) {
   let puzzle = false;
   let service_type;
   for (const item of items) {
-    if (item.product?.preOrder?.value == 1 || item.product?.totalInventory < 0)
+    if (item.product?.preOrder?.value == 1 || item.variant?.inventoryItem?.inventoryLevels?.edges?.[0]?.node?.quantities?.find(q => q.name === "on_hand")?.quantity  < 0)
       continue;
     //if (!item?.variant?.weight) continue;
     if (item.product?.largeLetter?.value !== "true") ll = false;
@@ -844,7 +844,7 @@ function buildCreateshipment(order) {
       // Only include items that are in stock and not pre-order
       return (
         !(
-          item.product?.preOrder?.value == 1 || item.product?.totalInventory < 0
+          item.product?.preOrder?.value == 1 || item.variant?.inventoryItem?.inventoryLevels?.edges?.[0]?.node?.quantities?.find(q => q.name === "on_hand")?.quantity < 0
         ) && item.unfulfilledQuantity > 0
       );
     });
@@ -860,7 +860,7 @@ function buildCreateshipment(order) {
     }
     if (
       item.product?.preOrder?.value == 1 ||
-      item.product?.totalInventory < 0
+      item.variant?.inventoryItem?.inventoryLevels?.edges?.[0]?.node?.quantities?.find(q => q.name === "on_hand")?.quantity < 0
     ) {
       continue;
     }

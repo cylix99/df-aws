@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//home/ian/**)",
+      "Bash(shopify app:*)",
+      "WebSearch",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Bash(shopify theme:*)",
+      "Bash(npm run build:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "/tmp"
+    ]
+  },
+  "mcpServers": {
+    "shopify-dev-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@shopify/dev-mcp@latest"
+      ]
+    },
+    "shopify-admin": {
+      "command": "npx",
+      "args": [
+        "shopify-mcp"
+      ],
+      "env": {
+        "MYSHOPIFY_DOMAIN": "puzzlesgalore.myshopify.com",
+        "SHOPIFY_ACCESS_TOKEN": "0d39435b7debdac0c16e180f5360bf0d"
+      }
+    }
+  }
+}

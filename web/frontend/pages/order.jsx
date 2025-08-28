@@ -1156,6 +1156,19 @@ const bulkOrdersText = () => {
                             id
                           } 
                           totalInventory
+                          variant {
+                          inventoryItem {
+                            inventoryLevels(first: 10) {
+                              edges {
+                                node {
+                                  quantities(names: ["on_hand"]) {
+                                    name
+                                    quantity
+                                  }
+                                }
+                              }
+                            }
+                          }
                           title
                         }
                         
@@ -1326,6 +1339,7 @@ function sortPickOrder(orders) {
           sku,
           image: item.image?.originalSrc,
           totalInventory: item.product?.totalInventory,
+          onHandInventory: item.variant?.inventoryItem?.inventoryLevels?.edges?.[0]?.node?.quantities?.find(q => q.name === "on_hand")?.quantity || 0,
           preOrder: item.product?.preOrder,
         });
         //}
