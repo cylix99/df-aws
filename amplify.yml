@@ -1,6 +1,12 @@
 version: 1
 backend:
   phases:
+    preBuild:
+      commands:
+        - nvm install 20.10.0
+        - nvm use 20.10.0
+        - node --version
+        - npm --version
     build:
       commands:
         - npm ci --legacy-peer-deps
@@ -9,6 +15,7 @@ frontend:
   phases:
     preBuild:
       commands:
+        - nvm use 20.10.0
         - cd web
         - npm ci --legacy-peer-deps
     build:
