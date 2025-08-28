@@ -7,12 +7,17 @@
       "Bash(node:*)",
       "Bash(npx:*)",
       "Bash(shopify theme:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(cp:*)",
+      "Bash(npm install:*)",
+      "Bash(amplify:*)",
+      "Bash(npm create:*)"
     ],
     "deny": [],
     "ask": [],
     "additionalDirectories": [
-      "/tmp"
+      "/tmp",
+      "/mnt/d/programming/shopify"
     ]
   },
   "mcpServers": {

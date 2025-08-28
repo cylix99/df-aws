@@ -1,0 +1,25 @@
+version: 1
+backend:
+  phases:
+    build:
+      commands:
+        - npm ci --legacy-peer-deps
+        - npx amplify backend build --outdir ./amplify-outputs
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd web
+        - npm ci --legacy-peer-deps
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: web/dist
+    files:
+      - '**/*'
+    name: amplify-outputs
+  cache:
+    paths:
+      - web/node_modules/**/*
+      - node_modules/**/*
