@@ -10,7 +10,7 @@ backend:
     build:
       commands:
         - npm install --legacy-peer-deps
-        - npx amplify backend build --outdir ./amplify-outputs
+        - npx ampx backend build --outdir ./amplify-outputs
 frontend:
   phases:
     preBuild:
