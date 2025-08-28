@@ -21,10 +21,9 @@ frontend:
         - npm install --legacy-peer-deps
     build:
       commands:
-        - cd web/frontend
         - npm run build
   artifacts:
-    baseDirectory: web/frontend/dist
+    baseDirectory: dist
     files:
       - '**/*'
     name: amplify-outputs
