@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 name = "Duncans Functions AWS"
-client_id = "4d3d13c96a2cd9aee42da25c5c45db97"
+client_id = "b126a7d952abe93293c4787622246c8d"
 application_url = "https://main.d2vg61wh9jjjw7.amplifyapp.com"
 scopes = "read_customers,write_customers,read_inventory,read_orders,read_all_orders,write_orders,read_products,write_products,read_product_listings,read_reports,read_shipping,write_assigned_fulfillment_orders,read_assigned_fulfillment_orders,write_fulfillments,read_fulfillments,read_merchant_managed_fulfillment_orders,write_merchant_managed_fulfillment_orders,read_third_party_fulfillment_orders,write_third_party_fulfillment_orders,read_discounts,write_discounts,write_store_credit_account_transactions"
 embedded = true
