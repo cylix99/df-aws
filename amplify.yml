@@ -9,8 +9,7 @@ applications:
             - nvm use 20.10.0
             - node --version
             - npm --version
-            - cd ../../
-            - npm install --legacy-peer-deps
+            - npm --prefix ../../ install --legacy-peer-deps
         build:
           commands:
             - echo "Backend build completed"
@@ -19,13 +18,11 @@ applications:
         preBuild:
           commands:
             - nvm use 20.10.0
-            - cd ../../
-            - npm install --legacy-peer-deps
-            - cd web
-            - npm install --legacy-peer-deps
+            - npm --prefix ../../ install --legacy-peer-deps
+            - npm --prefix ../ install --legacy-peer-deps
         build:
           commands:
-            - npm run build --prefix frontend
+            - npm --prefix ../ run build --prefix frontend
       artifacts:
         baseDirectory: dist
         files:
