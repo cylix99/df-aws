@@ -29,10 +29,6 @@ export default function App() {
                   label: "Pre-Orders",
                   destination: "/preorder",
                 },
-                {
-                  label: "Import Board Games",
-                  destination: "/bgg",
-                },
               ]}
             />
             <Routes pages={pages} />
