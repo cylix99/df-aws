@@ -22,7 +22,7 @@ applications:
             - npm --prefix ../ install --legacy-peer-deps
         build:
           commands:
-            - npm --prefix ../ run build --prefix frontend
+            - npm run build
       artifacts:
         baseDirectory: dist
         files:
